@@ -1,0 +1,48 @@
+{% extends "_layout.html" %}
+{% block main %}
+<div class="main">
+  <div class="home_page">
+    <!-- <div class="title">
+      <h1>Home</h1>
+    </div> -->
+
+    <div class="home_sub">
+
+      <div class="std_framing home_framing">
+        <h1>
+          Kinetic Metrics NHTSA Dashboard
+        </h1>
+
+
+        <hr>
+        Discover Kinetic Metrics, your trusted resource for accessing a wide range of Recalls and Investigations data.
+        Our intuitive dashboard brings together NHTSA's extensive dataset and our proprietary information, allowing you
+        to gain valuable insights and make informed decisions. Delve into the dynamic realm of automotive recalls and
+        investigations through our comprehensive platform, available exclusively at Kinetic Metrics.
+      </div>
+
+      <div class="home_buttons">
+
+        <a class="div_button home_register" href="{{ url_for('bp_users.register') }}">
+          Register
+        </a>
+
+        <a class="div_button home_login" href="{{ url_for('bp_users.login') }}">
+          Login
+        </a>
+        <br>
+        <a class="div_button home_login" href="{{ url_for('bp_users.login') }}">
+          Login as guest
+        </a>
+
+      </div>
+
+    </div>
+
+
+
+  </div>
+</div><!-- main -->
+
+
+{% endblock %}

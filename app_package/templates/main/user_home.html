@@ -1,0 +1,30 @@
+{% extends "_layout.html" %}
+{% block title %} Home {% endblock %}
+{% block main %}
+<section class="logged_in_home">
+    <div class="container">
+        <div class="home_label">
+            <h4>NHTSA Recalls and Investigations Data Dashboard</h4>
+            Welcome to the NHTSA Recalls and Investigations Data Dashboard<br/><br/>
+        </div>
+        <div class="select_page">
+            <a href="{{ url_for('bp_investigations.search_investigations',limit_flag='true') }}">Search Investigations</a>
+            <br/>
+            <a href="{{ url_for('bp_recalls.search_recalls',limit_flag='true') }}">Search Recalls</a>
+            <br/>
+            <a href="{{ url_for('bp_investigations.reports') }}">Reports</a>
+            
+            <br/>
+            <!-- <a href="{url_for('users.database_page') }">Database</a> -->
+            <a href="">Database</a>
+            
+            <br/>
+            <a href="{{ url_for('bp_admin.admin_page') }}">Permissions</a>
+            
+
+        </div>
+    </div>
+</section>
+
+
+{% endblock %}
