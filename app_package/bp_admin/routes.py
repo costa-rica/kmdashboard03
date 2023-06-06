@@ -10,11 +10,18 @@ import os
 import json
 from km03_models import sess, engine, text, Base, \
     Users
-
-from app_package.bp_users.utils import send_reset_email, send_confirm_email
+from app_package.bp_users.utils import send_reset_email, send_confirm_email, \
+    userPermission
+from app_package.bp_admin.utils import formatExcelHeader, \
+    load_database_util, fix_recalls_wb_util
 import pandas as pd
 import shutil
 from datetime import datetime
+
+
+import zipfile
+
+
 
 #Setting up Logger
 formatter = logging.Formatter('%(asctime)s:%(name)s:%(message)s')
@@ -104,6 +111,173 @@ def admin_page():
 
 
     return render_template('admin/admin.html', rincon_users=rincon_users, col_names=col_names)
+
+
+
+@bp_admin.route('/database_page', methods=["GET","POST"])
+@login_required
+def database_page():
+    tableNamesList=['investigations','tracking_inv','recalls','tracking_re','user']
+    # tableNamesList= db.engine.table_names()
+    legend='Database downloads'
+    if request.method == 'POST':
+        formDict = request.form.to_dict()
+        if formDict.get('build_workbook')=="True":
+            
+            #check if os.listdir(current_app.config['FILES_DATABASE']), if no create:
+            if not os.path.exists(current_app.config['FILES_DATABASE']):
+                # print('There is not database folder found???')
+                os.mkdir(current_app.config['FILES_DATABASE'])
+            
+            for file in os.listdir(current_app.config['FILES_DATABASE']):
+                os.remove(os.path.join(current_app.config['FILES_DATABASE'], file))
+
+            
+            timeStamp = datetime.now().strftime("%y%m%d_%H%M%S")
+            workbook_name=f"database_tables{timeStamp}.xlsx"
+            print('reportName:::', workbook_name)
+            excelObj=pd.ExcelWriter(os.path.join(current_app.config['FILES_DATABASE'], workbook_name),
+                date_format='yyyy/mm/dd', datetime_format='yyyy/mm/dd')
+            workbook=excelObj.book
+            
+            dictKeyList=[i for i in list(formDict.keys()) if i in tableNamesList]
+            dfDictionary={h : pd.read_sql_table(h, db.engine) for h in dictKeyList}
+            for name, df in dfDictionary.items():
+                if len(df)>900000:
+                    flash(f'Too many rows in {name} table', 'warning')
+                    return render_template('database.html',legend=legend, tableNamesList=tableNamesList)
+                df.to_excel(excelObj,sheet_name=name, index=False)
+                worksheet=excelObj.sheets[name]
+                start_row=0
+                formatExcelHeader(workbook,worksheet, df, start_row)
+                print(name, ' table added to workbook')
+                # if name=='dmrs':
+                    # dmrDateFormat = workbook.add_format({'num_format': 'yyyy-mm-dd'})
+                    # worksheet.set_column(1,1, 15, dmrDateFormat)
+                
+            print('path of reports:::',os.path.join(current_app.config['FILES_DATABASE'],str(workbook_name)))
+            excelObj.close()
+            print('excel object close')
+            # return send_from_directory(current_app.config['FILES_DATABASE'],workbook_name, as_attachment=True)
+            return redirect(url_for('users.database_page'))
+        elif formDict.get('download_db_workbook'):
+            return redirect(url_for('users.download_db_workbook'))
+        elif formDict.get('uploadFileButton'):
+            print('****uploadFileButton****')
+            formDict = request.form.to_dict()
+            filesDict = request.files.to_dict()
+            print('formDict:::',formDict)
+            print('filesDict:::', filesDict)
+            
+            
+            if not os.path.exists(current_app.config['UPLOADED_TEMP_DATA']):
+                os.mkdir(current_app.config['UPLOADED_TEMP_DATA'])
+            
+            file_type=formDict.get('file_type')
+            uploadData=request.files['fileUpload']
+            uploadFileName=uploadData.filename
+            uploadData.save(os.path.join(current_app.config['UPLOADED_TEMP_DATA'], uploadFileName))
+            if file_type=="excel":
+                wb = openpyxl.load_workbook(uploadData)
+                sheetNames=json.dumps(wb.sheetnames)
+                tableNamesList=json.dumps(tableNamesList)
+
+                return redirect(url_for('bp_admin.database_upload',legend=legend,tableNamesList=tableNamesList,
+                    sheetNames=sheetNames, uploadFileName=uploadFileName,file_type=file_type))
+            return redirect(url_for('bp_admin.database_upload',legend=legend,uploadFileName=uploadFileName,
+                file_type=file_type))
+            # return redirect(url_for('users.database_page'))
+    return render_template('admin/database_page.html', legend=legend, tableNamesList=tableNamesList)
+
+
+
+@bp_admin.route('/database_upload', methods=["GET","POST"])
+@login_required
+def database_upload():
+    file_type=request.args.get('file_type')
+    if file_type=='excel':
+        tableNamesList=json.loads(request.args['tableNamesList'])
+        sheetNames=json.loads(request.args['sheetNames'])
+    uploadFileName=request.args.get('uploadFileName')
+    legend='Upload Data File to Database'
+    # uploadFlag=True
+    limit_upload_flag='checked'
+    
+    
+    
+    if request.method == 'POST':
+        
+        formDict = request.form.to_dict()
+        print('formDict::::', formDict)
+        if formDict.get('appendExcel'):
+            
+            uploaded_file=os.path.join(current_app.config['UPLOADED_TEMP_DATA'], uploadFileName)
+            print('uploaded_file::::',uploaded_file)
+            if file_type=='excel':
+                for sheet in sheetNames:
+                    sheetUpload=pd.read_excel(uploaded_file,engine='openpyxl',sheet_name=sheet)
+                    if sheet=='user':
+                        existing_emails=[i[0] for i in db.session.query(User.email).all()]
+                        sheetUpload=pd.read_excel(uploaded_file,engine='openpyxl',sheet_name='user')
+                        sheetUpload=sheetUpload[~sheetUpload['email'].isin(existing_emails)]
+
+                    elif formDict.get(sheet) in ['investigations','recalls']:
+                        sheetUpload['date_updated']=datetime.now()
+                        if formDict.get(sheet) =='recalls':
+                            sheetUpload=fix_recalls_wb_util(sheetUpload,uploadFileName)
+                    try:
+                        sheetUpload.to_sql(formDict.get(sheet),con=db.engine, if_exists='append', index=False)
+                        print('upload SUCCESS!: ', sheet)
+                    except IndexError:
+                        pass
+                    except:
+                        os.remove(os.path.join(current_app.config['UPLOADED_TEMP_DATA'], uploadFileName))
+
+                        flash(f"""Problem uploading {sheet} table. Check for 1)uniquness with id or RECORD_ID 2)date columns
+                            are in a date format in excel.""", 'warning')
+                    
+                    #clear files_temp folder
+                    for file in os.listdir(current_app.config['UPLOADED_TEMP_DATA']):
+                        os.remove(os.path.join(current_app.config['UPLOADED_TEMP_DATA'], file))
+                    flash(f'Table successfully uploaded to database!', 'success')
+                    return redirect(url_for('bp_admin.database_page',legend=legend,
+                        tableNamesList=tableNamesList, sheetNames=sheetNames))
+
+                
+            elif file_type=='text':
+                zipfile.ZipFile(uploaded_file).extractall(path=current_app.config['UPLOADED_TEMP_DATA'])
+                
+                
+                text_file_name=[x for x in os.listdir(current_app.config['UPLOADED_TEMP_DATA']) if x[-4:]=='.txt'][0]
+                limit_upload_flag=formDict.get('limit_upload_flag')
+                
+                flash_message=load_database_util(text_file_name, limit_upload_flag)
+                
+                
+                
+                for file in os.listdir(current_app.config['UPLOADED_TEMP_DATA']):
+                    os.remove(os.path.join(current_app.config['UPLOADED_TEMP_DATA'], file))
+
+                    
+                flash(flash_message[0], flash_message[1])
+
+                return redirect(url_for('bp_admin.database_page',legend=legend))
+
+    
+    if file_type=='excel':
+        return render_template('admin/database_upload.html',legend=legend,tableNamesList=tableNamesList,
+                    sheetNames=sheetNames, uploadFileName=uploadFileName,
+                    # uploadFlag=uploadFlag,
+                    file_type=file_type)
+    else:
+        return render_template('admin/database_upload.html',legend=legend,
+                    uploadFileName=uploadFileName,
+                    # uploadFlag=uploadFlag,
+                    file_type=file_type,limit_upload_flag=limit_upload_flag)
+
+
+
+
 
 # @bp_admin.route('/admin_db_download', methods = ['GET', 'POST'])
 # @login_required

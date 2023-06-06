@@ -42,8 +42,8 @@ formatter = logging.Formatter('%(asctime)s:%(name)s:%(message)s')
 formatter_terminal = logging.Formatter('%(asctime)s:%(filename)s:%(name)s:%(message)s')
 
 #initialize a logger
-logger_main = logging.getLogger(__name__)
-logger_main.setLevel(logging.DEBUG)
+logger_bp_inv = logging.getLogger(__name__)
+logger_bp_inv.setLevel(logging.DEBUG)
 
 
 #where do we store logging information
@@ -55,8 +55,8 @@ stream_handler = logging.StreamHandler()
 stream_handler.setFormatter(formatter_terminal)
 
 # logger_sched.handlers.clear() #<--- This was useful somewhere for duplicate logs
-logger_main.addHandler(file_handler)
-logger_main.addHandler(stream_handler)
+logger_bp_inv.addHandler(file_handler)
+logger_bp_inv.addHandler(stream_handler)
 
 # logger = logging.getLogger(__name__)
 # logger.setLevel(logging.DEBUG)
@@ -75,7 +75,7 @@ bp_investigations = Blueprint('bp_investigations', __name__)
 @login_required
 def search_investigations():
     print('*TOP OF def search_investigations()*')
-    logger.info('in search_investigations page')
+    logger_bp_inv.info('in search_investigations page')
     category_list = [y for x in category_list_dict_util().values() for y in x]
     column_names=column_names_inv_util()
     column_names_dict=column_names_dict_inv_util()
@@ -468,7 +468,7 @@ def reports():
             column_names_for_df=[i for i in column_names_re if i in list(formDict.keys())]
             column_names_for_df.insert(0,'RECORD_ID')
             create_categories_xlsx(excel_file_name_re, column_names_for_df, formDict, 'recalls')
-        logger.info('in search page')
+        logger_bp_inv.info('in search page')
         return redirect(url_for('bp_investigations.reports'))
     return render_template('reports.html', excel_file_name_inv=excel_file_name_inv, time_stamp_inv=time_stamp_inv,
         column_names_inv=column_names_inv,column_names_re=column_names_re, categories_dict_inv=categories_dict_inv,

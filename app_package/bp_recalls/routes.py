@@ -42,8 +42,8 @@ formatter = logging.Formatter('%(asctime)s:%(name)s:%(message)s')
 formatter_terminal = logging.Formatter('%(asctime)s:%(filename)s:%(name)s:%(message)s')
 
 #initialize a logger
-logger_main = logging.getLogger(__name__)
-logger_main.setLevel(logging.DEBUG)
+logger_bp_recalls = logging.getLogger(__name__)
+logger_bp_recalls.setLevel(logging.DEBUG)
 
 
 #where do we store logging information
@@ -55,8 +55,8 @@ stream_handler = logging.StreamHandler()
 stream_handler.setFormatter(formatter_terminal)
 
 # logger_sched.handlers.clear() #<--- This was useful somewhere for duplicate logs
-logger_main.addHandler(file_handler)
-logger_main.addHandler(stream_handler)
+logger_bp_recalls.addHandler(file_handler)
+logger_bp_recalls.addHandler(stream_handler)
 
 # logger = logging.getLogger(__name__)
 # logger.setLevel(logging.DEBUG)

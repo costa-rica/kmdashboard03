@@ -1,5 +1,7 @@
 from flask import Blueprint
-from flask import render_template
+from flask import render_template, url_for, redirect, flash, request, \
+    abort, session, Response, current_app, send_from_directory, make_response
+from flask_login import login_required, login_user, logout_user, current_user
 import os
 import logging
 from logging.handlers import RotatingFileHandler
@@ -39,7 +41,8 @@ def home():
 @bp_main.route("/user_home", methods=["GET","POST"])
 def user_home():
     logger_bp_main.info(f"-- in user_home page route --")
-
+    if not current_user.is_authenticated:
+        return redirect(url_for('bp_main.home'))
     # #Build db
     # if os.path.exists(os.path.join(os.environ.get('DB_ROOT'),os.environ.get('DB_NAME'))):
     #     print(f"db already exists: {os.path.join(os.environ.get('DB_ROOT'),os.environ.get('DB_NAME'))}")

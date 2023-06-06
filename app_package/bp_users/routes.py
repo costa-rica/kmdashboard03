@@ -91,7 +91,7 @@ def login():
 @bp_users.route('/register', methods = ['GET', 'POST'])
 def register():
     if current_user.is_authenticated:
-        return redirect(url_for('bp_main.rincons'))
+        return redirect(url_for('bp_main.user_home'))
     page_name = 'Register'
     if request.method == 'POST':
         formDict = request.form.to_dict()
@@ -130,7 +130,7 @@ def register():
         flash(f'Succesfully registered: {new_email}', 'info')
         return redirect(url_for('bp_main.home'))
 
-    return render_template('bp_users/register.html', page_name = page_name)
+    return render_template('users/register.html', page_name = page_name)
 
 
 @bp_users.route('/logout')
@@ -143,7 +143,7 @@ def logout():
 def reset_password():
     page_name = 'Request Password Change'
     if current_user.is_authenticated:
-        return redirect(url_for('dash.dashboard', dash_dependent_var='steps'))
+        return redirect(url_for('bp_main.user_home'))
     # form = RequestResetForm()
     # if form.validate_on_submit():
     if request.method == 'POST':
@@ -160,7 +160,7 @@ def reset_password():
             flash('Email has not been registered with What Sticks','warning')
 
         return redirect(url_for('bp_users.reset_password'))
-    return render_template('bp_users/reset_request.html', page_name = page_name)
+    return render_template('users/reset_request.html', page_name = page_name)
 
 
 @bp_users.route('/reset_password/<token>', methods = ["GET", "POST"])
@@ -185,5 +185,11 @@ def reset_token(token):
             flash('Must enter non-empty password', 'warning')
             return redirect(url_for('bp_users.reset_token', token=token))
 
-    return render_template('bp_users/reset_request.html', page_name='Reset Password')
+    return render_template('users/reset_request.html', page_name='Reset Password')
+
+
+
+
+
+
 

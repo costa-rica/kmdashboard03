@@ -3,7 +3,7 @@ from flask_login import current_user
 import json
 # import requests
 # from datetime import datetime, timedelta
-from km03_models import sess, Users
+from km03_models import sess, Users, Recalls, Investigations
 # import time
 from flask_mail import Message
 from app_package import mail
@@ -14,7 +14,9 @@ import shutil
 import logging
 from logging.handlers import RotatingFileHandler
 # import re
-# import pandas as pd
+import pandas as pd
+from datetime import datetime
+import csv
 
 
 #Setting up Logger
@@ -39,6 +41,14 @@ logger_main.addHandler(file_handler)
 logger_main.addHandler(stream_handler)
 
 
+#Kinetic Metrics, LLC
+def userPermission(email):
+    kmPermissions=['nickapeed@yahoo.com','test@test.com',
+        'emily.reichard@kineticmetrics.com']
+    if email in kmPermissions:
+        return (True,'1,2,3,4,5,6,7,8')
+    
+    return (False,)
 
 def send_reset_email(user):
     token = user.get_reset_token()
@@ -58,19 +68,13 @@ If you did not make this request, ignore email and there will be no change
 def send_confirm_email(email):
     if os.environ.get('CONFIG_TYPE') == 'prod':
         logger_main.info(f"-- sending email to {email} --")
-        msg = Message('Welcome to Tu Rincón!',
+        msg = Message('Welcome to Kinetic Metrics Dashboard03!',
             sender=current_app.config.get('MAIL_USERNAME'),
             recipients=[email])
-        msg.body = 'You have succesfully been registered to Tu Rincón.'
+        msg.body = 'You have succesfully been registered to Kinetic Metrics Dashboard03.'
         mail.send(msg)
         logger_main.info(f"-- email sent --")
     else :
-        logger_main.info(f"-- Non prod mode so no email sent --")
+        logger_main.info(f"-- Non prod mode, no email sent --")
 
-        logger_main.info(f"-- sending email to {email} --")
-        msg = Message('Welcome to Tu Rincón!',
-            sender=current_app.config.get('MAIL_USERNAME'),
-            recipients=[email])
-        msg.body = 'You have succesfully been registered to Tu Rincón.'
-        mail.send(msg)
-        logger_main.info(f"-- email sent --")
+
