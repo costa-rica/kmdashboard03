@@ -12209,6 +12209,9 @@ textarea.form-control-lg {
   justify-content: end;
   padding-right: 3rem;
 }
+.footer .footer_right .contact_nick {
+  font-size: 1.5rem;
+}
 
 @media screen and (min-width: 768px) {
   section.navbar_section .navbar_custom {

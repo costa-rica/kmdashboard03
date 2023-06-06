@@ -70,8 +70,11 @@ def load_database_util(text_file_name, limit_upload_flag):
         else:
             df_inv=pd.read_csv(os.path.join(current_app.config['UPLOADED_TEMP_DATA'], text_file_name),
                 sep='\t', lineterminator='\r', names=col_names,header=None)
-        df_inv['ODATE']=pd.to_datetime(df_inv['ODATE'],format='%Y%m%d')
-        df_inv['CDATE']=pd.to_datetime(df_inv['CDATE'],format='%Y%m%d')
+        
+        # This converts all column objects to dates then back to string. Note: sqlalchemy will convert back to date
+        # as long as in the format %Y-%m-%d
+        df_inv['ODATE']=pd.to_datetime(df_inv['ODATE'],format='%Y%m%d').dt.strftime('%Y-%m-%d')
+        df_inv['CDATE']=pd.to_datetime(df_inv['CDATE'],format='%Y%m%d').dt.strftime('%Y-%m-%d')
         df_inv['km_notes']=''
         df_inv['date_updated']=pd.to_datetime(datetime.now())
         df_inv['files']=''
@@ -113,30 +116,30 @@ def load_database_util(text_file_name, limit_upload_flag):
         df_re['ODATE']=df_re['ODATE'][:9]
         df_re['RCDATE']=df_re['RCDATE'][:9]
         df_re['DATEA']=df_re['DATEA'][:9]
-        try:
-            df_re['BGMAN']=pd.to_datetime(df_re['BGMAN'],format='%Y-%m-%d')
-        except ValueError:
-            df_re['BGMAN']=pd.to_datetime(df_re['BGMAN'],format='%Y%m%d')
-        try:
-            df_re['ENDMAN']=pd.to_datetime(df_re['ENDMAN'],format='%Y-%m-%d')
-        except ValueError:
-            df_re['ENDMAN']=pd.to_datetime(df_re['ENDMAN'],format='%Y%m%d')
+        # try:
+        # df_re['BGMAN']=pd.to_datetime(df_re['BGMAN'],format='%Y-%m-%d').dt.strftime('%Y-%m-%d')
+        # except ValueError:
+        df_re['BGMAN']=pd.to_datetime(df_re['BGMAN'],format='%Y%m%d').dt.strftime('%Y-%m-%d')
+        # try:
+        #     df_re['ENDMAN']=pd.to_datetime(df_re['ENDMAN'],format='%Y-%m-%d')
+        # except ValueError:
+        df_re['ENDMAN']=pd.to_datetime(df_re['ENDMAN'],format='%Y%m%d').dt.strftime('%Y-%m-%d')
         # df_re['ENDMAN']=pd.to_datetime(df_re['ENDMAN'],format='%Y-%m-%d')
-        try:
-            df_re['ODATE']=pd.to_datetime(df_re['ODATE'],format='%Y-%m-%d')
-        except ValueError:
-            df_re['ODATE']=pd.to_datetime(df_re['ODATE'],format='%Y%m%d')
+        # try:
+        #     df_re['ODATE']=pd.to_datetime(df_re['ODATE'],format='%Y-%m-%d')
+        # except ValueError:
+        df_re['ODATE']=pd.to_datetime(df_re['ODATE'],format='%Y%m%d').dt.strftime('%Y-%m-%d')
         # df_re['ODATE']=pd.to_datetime(df_re['ODATE'],format='%Y-%m-%d')
-        try:
-            df_re['RCDATE']=pd.to_datetime(df_re['RCDATE'],format='%Y-%m-%d')
-        except ValueError:
-            df_re['RCDATE']=pd.to_datetime(df_re['RCDATE'],format='%Y%m%d')
+        # try:
+        #     df_re['RCDATE']=pd.to_datetime(df_re['RCDATE'],format='%Y-%m-%d')
+        # except ValueError:
+        df_re['RCDATE']=pd.to_datetime(df_re['RCDATE'],format='%Y%m%d').dt.strftime('%Y-%m-%d')
         # df_re['RCDATE']=pd.to_datetime(df_re['RCDATE'],format='%Y-%m-%d')
         # df_re['DATEA']=pd.to_datetime(df_re['DATEA'],format='%Y-%m-%d')
-        try:
-            df_re['DATEA']=pd.to_datetime(df_re['DATEA'],format='%Y-%m-%d')
-        except ValueError:
-            df_re['DATEA']=pd.to_datetime(df_re['DATEA'],format='%Y%m%d')
+        # try:
+        #     df_re['DATEA']=pd.to_datetime(df_re['DATEA'],format='%Y-%m-%d')
+        # except ValueError:
+        df_re['DATEA']=pd.to_datetime(df_re['DATEA'],format='%Y%m%d').dt.strftime('%Y-%m-%d')
         df_re['km_notes']=''
         df_re['date_updated']=pd.to_datetime(datetime.now())
         df_re['files']=''
@@ -246,3 +249,21 @@ def read_FLAT_RCL_to_df(text_file_name, limit_upload_flag):
     
     logger_bp_admin.info(f"- finished read_FLAT_RCL_to_df, df count: {len(df)} ")
     return df
+
+
+def handleDateColumns(pandasSeries):
+    # Convert each row to a string with the desired format 'YYYY-MM-DD' or set it as '9999-01-01'
+    pandasSeries = pandasSeries.apply(lambda x: x.strftime('%Y-%m-%d') if isinstance(x, datetime) else x)
+
+    # Validate the date format and replace non-date strings with '9999-01-01'
+    pandasSeries = pd.to_datetime(pandasSeries, errors='coerce').dt.strftime('%Y-%m-%d').fillna('9999-01-01')
+
+    for _, row in df_inv.iterrows():
+        try:
+            example_row = ExampleTable(date_column=datetime.strptime(pandasSeries, '%Y-%m-%d').date())
+            session.add(example_row)
+        except Exception as e:
+    #         print(f"Error processing row: {row} - {e}")
+            pass
+
+

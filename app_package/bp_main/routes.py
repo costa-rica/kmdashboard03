@@ -29,12 +29,6 @@ logger_bp_main.addHandler(stream_handler)
 def home():
     logger_bp_main.info(f"-- in home page route --")
 
-    # #Build db
-    # if os.path.exists(os.path.join(os.environ.get('DB_ROOT'),os.environ.get('DB_NAME'))):
-    #     print(f"db already exists: {os.path.join(os.environ.get('DB_ROOT'),os.environ.get('DB_NAME'))}")
-    # else:
-    #     Base.metadata.create_all(engine)
-    #     print(f"NEW db created: {os.path.join(os.environ.get('DB_ROOT'),os.environ.get('DB_NAME'))}")
 
     return render_template('main/home.html')
 
@@ -43,12 +37,7 @@ def user_home():
     logger_bp_main.info(f"-- in user_home page route --")
     if not current_user.is_authenticated:
         return redirect(url_for('bp_main.home'))
-    # #Build db
-    # if os.path.exists(os.path.join(os.environ.get('DB_ROOT'),os.environ.get('DB_NAME'))):
-    #     print(f"db already exists: {os.path.join(os.environ.get('DB_ROOT'),os.environ.get('DB_NAME'))}")
-    # else:
-    #     Base.metadata.create_all(engine)
-    #     print(f"NEW db created: {os.path.join(os.environ.get('DB_ROOT'),os.environ.get('DB_NAME'))}")
+
 
     return render_template('main/user_home.html')
 

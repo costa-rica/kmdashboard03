@@ -175,7 +175,7 @@ def search_investigations():
                 limit_flag=limit_flag))
     
 
-    return render_template('search_investigations.html',table_data = investigation_data_list, 
+    return render_template('main/search_investigations.html',table_data = investigation_data_list, 
         column_names_dict=column_names_dict, column_names=column_names,
         len=len, make_list = make_list, query_file_name=query_file_name,
         search_criteria_dictionary=search_criteria_dictionary,str=str,
