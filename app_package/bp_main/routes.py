@@ -24,6 +24,16 @@ stream_handler.setFormatter(formatter_terminal)
 logger_bp_main.addHandler(file_handler)
 logger_bp_main.addHandler(stream_handler)
 
+@bp_main.before_request
+def before_request():
+    logger_bp_main.info(f"-- ***** in before_request route --")
+    ###### TEMPORARILY_DOWN: redirects to under construction page ########
+    if os.environ.get('TEMPORARILY_DOWN') == '1':
+        if request.url != request.url_root + url_for('bp_main.temporarily_down')[1:]:
+            # logger_bp_users.info("*** (logger_bp_users) Redirected ")
+            logger_bp_main.info(f'- request.referrer: {request.referrer}')
+            logger_bp_main.info(f'- request.url: {request.url}')
+            return redirect(url_for('bp_main.temporarily_down'))
 
 @bp_main.route("/", methods=["GET","POST"])
 def home():
@@ -40,5 +50,15 @@ def user_home():
 
 
     return render_template('main/user_home.html')
+
+
+@bp_main.route("/temporarily_down", methods=["GET","POST"])
+def temporarily_down():
+    logger_bp_main.info(f"-- in temporarily_down page route --")
+    # if not current_user.is_authenticated:
+    #     return redirect(url_for('bp_main.home'))
+
+
+    return render_template('main/temporarily_down.html')
 
 

@@ -49,6 +49,17 @@ salt = bcrypt.gensalt()
 bp_admin = Blueprint('bp_admin', __name__)
 
 
+@bp_admin.before_request
+def before_request():
+    logger_bp_admin.info(f"-- ***** in before_request route --")
+    ###### TEMPORARILY_DOWN: redirects to under construction page ########
+    if os.environ.get('TEMPORARILY_DOWN') == '1':
+        if request.url != request.url_root + url_for('bp_main.temporarily_down')[1:]:
+            # logger_bp_users.info("*** (logger_bp_users) Redirected ")
+            logger_bp_admin.info(f'- request.referrer: {request.referrer}')
+            logger_bp_admin.info(f'- request.url: {request.url}')
+            return redirect(url_for('bp_main.temporarily_down'))
+
 @bp_admin.route('/admin_page', methods = ['GET', 'POST'])
 @login_required
 def admin_page():

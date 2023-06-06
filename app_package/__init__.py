@@ -38,6 +38,9 @@ logging.getLogger('werkzeug').setLevel(logging.DEBUG)
 logging.getLogger('werkzeug').addHandler(file_handler)
 
 logger_init.info(f'--- Starting Flask KM Dashboard03 NHTSA---')
+TEMPORARILY_DOWN = "ACTIVE" if os.environ.get('TEMPORARILY_DOWN') == "1" else "inactive"
+# TEMPORARILY_DOWN=1
+logger_init.info(f'-- TEMPORARILY_DOWN: {TEMPORARILY_DOWN}')
 
 mail = Mail()
 

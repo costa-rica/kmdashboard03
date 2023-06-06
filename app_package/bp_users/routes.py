@@ -44,10 +44,28 @@ bp_users = Blueprint('bp_users', __name__)
 @bp_users.before_request
 def before_request():
     logger_bp_users.info("- in bp_users.before_request ")
+    ###### Keeps user logged in 31 days ########
     session.permanent = True
     current_app.permanent_session_lifetime = datetime.timedelta(days=31)
     session.modified = True
     logger_bp_users.info(f"!--> current_app.permanent_session_lifetime: {current_app.permanent_session_lifetime}")
+    ###### END Keeps user logged in 31 days ######## 
+    ###### TEMPORARILY_DOWN: redirects to under construction page ########
+    if os.environ.get('TEMPORARILY_DOWN') == '1':
+        if request.url != request.url_root + url_for('bp_main.temporarily_down')[1:]:
+            # logger_bp_users.info("*** (logger_bp_users) Redirected ")
+            logger_bp_users.info(f'- request.referrer: {request.referrer}')
+            logger_bp_users.info(f'- request.url: {request.url}')
+            return redirect(url_for('bp_main.temporarily_down'))
+
+# # @bp_main.before_request
+# # def before_request():
+#     # logger_bp_main.info(f"-- ***** in before_request route --")
+#     #     # if not current_user.is_authenticated:
+#     logger_bp_users.info(f"- request: {request.url}")
+#     if request.url != "http://localhost:5000/":
+#         logger_bp_users.info("*** Redirected ")
+#         return redirect(url_for('bp_main.home'))
 
 
 @bp_users.route('/login', methods = ['GET', 'POST'])

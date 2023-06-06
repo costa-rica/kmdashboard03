@@ -71,6 +71,18 @@ logger_bp_inv.addHandler(stream_handler)
 bp_investigations = Blueprint('bp_investigations', __name__)
 
 
+@bp_investigations.before_request
+def before_request():
+    logger_bp_inv.info(f"-- ***** in before_request route --")
+    ###### TEMPORARILY_DOWN: redirects to under construction page ########
+    if os.environ.get('TEMPORARILY_DOWN') == '1':
+        if request.url != request.url_root + url_for('bp_main.temporarily_down')[1:]:
+            # logger_bp_users.info("*** (logger_bp_users) Redirected ")
+            logger_bp_inv.info(f'- request.referrer: {request.referrer}')
+            logger_bp_inv.info(f'- request.url: {request.url}')
+            return redirect(url_for('bp_main.temporarily_down'))
+
+
 @bp_investigations.route("/search_investigations", methods=["GET","POST"])
 @login_required
 def search_investigations():
