@@ -380,7 +380,7 @@ def investigations_dashboard():
             return redirect(url_for('bp_investigations.investigations_dashboard', record_type=record_type, 
                 inv_id_for_dash=inv_id_for_dash,current_inv_files_dir_name=current_inv_files_dir_name))
                 
-    return render_template('dashboard_inv.html',inv_entry_top_list=inv_entry_top_list,
+    return render_template('main/dashboard_inv.html',inv_entry_top_list=inv_entry_top_list,
         dash_inv_list=dash_inv_list, str=str, len=len, inv_id_for_dash=inv_id_for_dash,
         verified_by_list=verified_by_list,checkbox_verified=checkbox_verified, int=int, 
         category_list_dict=category_list_dict, list=list,current_inv_files_dir_name=current_inv_files_dir_name,

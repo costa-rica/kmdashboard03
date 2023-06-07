@@ -1,0 +1,63 @@
+/* Search Investigaitons Page */
+.search_investigations_page {
+  .search {
+    width: 100%;
+    padding: 1rem 0rem;
+  }
+
+  .rows_search_form {
+    display: flex;
+    flex-wrap: wrap;
+  }
+
+  .search_item_group {
+    // background-color: green;
+    padding: 1rem 2rem;
+  }
+
+
+
+  .search_buttons_group {
+    width: 100%;
+    // display:flex;
+    // justify-content: end;
+    // flex-wrap: wrap;
+    padding-bottom: 1rem;
+  }
+
+  .search_buttons_group_sub {
+    width: 100%;
+    display: flex;
+    justify-content: end;
+    flex-wrap: wrap;
+    padding: 1rem;
+  }
+
+  .search_checkbox {
+    width: 100%;
+    display: flex;
+    justify-content: end;
+  }
+  .btn_width{
+    width: 10rem;
+  }
+  // .btn_div{
+  //   // width: auto;
+  // }
+}
+
+/* Dashboard Investigations */
+.dashboard_investigations_page{
+  .dashboard{
+    display: flex;
+    flex-wrap: wrap;
+  }
+
+
+.above_dash{
+  width:100%;
+  display:flex;
+  
+}
+
+}

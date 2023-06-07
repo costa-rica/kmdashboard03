@@ -1,63 +1,71 @@
 {% extends "_layout.html" %}
 {% block title %} Investigations {% endblock %}
 {% block main %}
-            
-<section class="search" id="search">
-    <div class="container">
+<form method="POST" enctype="multipart/form-data" id="form_investigations_search"></form>
+<form method="POST" enctype="multipart/form-data" id="form_investigations_table"></form>
+
+<div class="main main_wrap">
+
+<div class="search_investigations_page">
+
+
+
+<div class="search" id="search">
+    <div class="container std_framing">
         
-    <form method="POST" action="" enctype="multipart/form-data">
+    <!-- <form method="POST" action="" enctype="multipart/form-data"> -->
         <div class="search_heading_inv">
             <h4>Search <u><b>Investigations</b></u></h4>
         </div>
         <div class="rows_search_form">
         {% for db_name, criteria in column_names_dict.items() %}
             {% if db_name in ('id','ODATE', 'CDATE','YEAR') %}
-            <div class="dict_search">
+            <div class="dict_search search_item_group">
                 <div class="label_search_form">
                     {{ criteria }}
-                </div>
+                </div><!-- label_search_form -->
                 {% if db_name == 'id' %}
                 <div class="text_search_form">
-                    <input type="text" class="" name="{{ 'sc_' + db_name }}" 
-                        value= "{{ search_criteria_dictionary.get(db_name).0 }}">
-                </div>
+                    <input type="text" class="form-control" name="{{ 'sc_' + db_name }}" 
+                        value= "{{ search_criteria_dictionary.get(db_name).0 }}" form="form_investigations_search">
+                </div><!-- text_search_form -->
                 {% elif db_name == 'YEAR' %}
                     <div class="text_search_form">
-                        <input type="text" class="" name="{{ 'sc_' + db_name }}" placeholder="YYYY"
-                            value= "{{ search_criteria_dictionary.get(db_name).0 }}">
-                    </div>
+                        <input type="text" class="form-control" name="{{ 'sc_' + db_name }}" placeholder="YYYY"
+                            value= "{{ search_criteria_dictionary.get(db_name).0 }}" form="form_investigations_search">
+                    </div><!-- text_search_form -->
                 {% else %}
                     <div class="text_search_form">
-                        <input type="text" class="" name="{{ 'sc_' + db_name }}" placeholder="YYYY-MM-DD"
-                            value= "{{ str(search_criteria_dictionary.get(db_name).0)[:10] }}">
-                    </div>
+                        <input type="text" class="form-control" name="{{ 'sc_' + db_name }}" placeholder="YYYY-MM-DD"
+                            value= "{{ str(search_criteria_dictionary.get(db_name).0)[:10] }}" form="form_investigations_search">
+                    </div><!-- text_search_form -->
                 {% endif %}<!--if criteria in ('id','ODATE', 'CDATE','YEAR'); if criteria == 'id'; elif criteria == 'YEAR'-->
                 <div class="checkbox_search_form">
                     {% if search_criteria_dictionary.get(db_name).1 == "less_than" %}
-                        <input type="radio" name="{{ 'match_type_' + db_name }}" value="less_than" checked=true> Less Than
-                        <input type="radio" name="{{ 'match_type_' + db_name }}" value="exact" > Exact
-                        <input type="radio" name="{{ 'match_type_' + db_name }}" value="greater_than" > Greater Than
+                        <input type="radio" name="{{ 'match_type_' + db_name }}" value="less_than" checked=true form="form_investigations_search"> Less Than
+                        <input type="radio" name="{{ 'match_type_' + db_name }}" value="exact" form="form_investigations_search"> Exact
+                        <input type="radio" name="{{ 'match_type_' + db_name }}" value="greater_than" form="form_investigations_search"> Greater Than
                     {% elif search_criteria_dictionary.get(db_name).1 == "greater_than" %}
-                        <input type="radio" name="{{ 'match_type_' + db_name }}" value="less_than" > Less Than
-                        <input type="radio" name="{{ 'match_type_' + db_name }}" value="exact" > Exact
-                        <input type="radio" name="{{ 'match_type_' + db_name }}" value="greater_than" checked=true> Greater Than                           
+                        <input type="radio" name="{{ 'match_type_' + db_name }}" value="less_than" form="form_investigations_search"> Less Than
+                        <input type="radio" name="{{ 'match_type_' + db_name }}" value="exact" form="form_investigations_search"> Exact
+                        <input type="radio" name="{{ 'match_type_' + db_name }}" value="greater_than" checked=true form="form_investigations_search"> Greater Than                           
                     {% else %}
-                        <input type="radio" name="{{ 'match_type_' + db_name }}" value="less_than"> Less Than
-                        <input type="radio" name="{{ 'match_type_' + db_name }}" value="exact" checked=true> Exact
-                        <input type="radio" name="{{ 'match_type_' + db_name }}" value="greater_than"> Greater Than
+                        <input type="radio" name="{{ 'match_type_' + db_name }}" value="less_than" form="form_investigations_search"> Less Than
+                        <input type="radio" name="{{ 'match_type_' + db_name }}" value="exact" checked=true form="form_investigations_search"> Exact
+                        <input type="radio" name="{{ 'match_type_' + db_name }}" value="greater_than" form="form_investigations_search"> Greater Than
                     {% endif %}<!--if search_criteria_dictionary.get(criteria).1 == "less_than"; get(criteria).1 == "greater_than" -->
-                </div>
-            </div>
+                </div><!-- checkbox_search_form -->
+            </div><!-- <div class="dict_search">-->
             {% else %}<!--if db_name in ('id','ODATE', 'CDATE','YEAR')-->
-            <div class="dict_search">   
+            <div class="dict_search search_item_group">   
                 <div class="label_search_form">
                     {{ criteria }}
                 </div>
                             
                 {% if db_name == 'MAKE' %}
                 <div class="text_search_form">
-                    <input type="text" class="text_input" name="{{ 'sc_' + db_name }}"  list="makeList"
-                        value= "{{ search_criteria_dictionary.get(db_name).0 }}">
+                    <input type="text" class="text_input form-control" name="{{ 'sc_' + db_name }}"  list="makeList"
+                        value= "{{ search_criteria_dictionary.get(db_name).0 }}" form="form_investigations_search">
                     <datalist id="makeList">
                         {% for i in make_list %}
                             <option>{{ i }}</option>
@@ -66,29 +74,29 @@
                 </div>
                 {% else %}
                 <div class="text_search_form">
-                    <input type="text" class="" name="{{ 'sc_' + db_name }}" 
-                        value= "{{ search_criteria_dictionary.get(db_name).0 }}">
+                    <input type="text" class="form-control" name="{{ 'sc_' + db_name }}" 
+                        value= "{{ search_criteria_dictionary.get(db_name).0 }}" form="form_investigations_search">
                 </div>
                 {% endif %}<!--if criteria == 'MAKE'-->
 
                 <div class="checkbox_search_form">
                 {% if search_criteria_dictionary.get(criteria).1 == "exact" %}
-                    <input type="checkbox" name="{{ 'match_type_' + db_name }}" value="exact" checked=true> Exact
+                    <input type="checkbox" name="{{ 'match_type_' + db_name }}" value="exact" checked=true form="form_investigations_search"> Exact
                     {% else %}
-                    <input type="checkbox" name="{{ 'match_type_' + db_name }}" value="exact"> Exact
+                    <input type="checkbox" name="{{ 'match_type_' + db_name }}" value="exact" form="form_investigations_search"> Exact
                 {% endif %}<!--if search_criteria_dictionary.get(criteria).1 == "exact"-->
                 </div>
             </div>
             {% endif %}<!--if criteria in ('ODATE', 'CDATE','YEAR'), elif criteria not in ('id') -->
         {% endfor %}<!-- { for criteria in column_names } -->
             <!--START -verified by search input -->
-            <div class="dict_search">
+            <div class="dict_search search_item_group">
                 <div class="label_search_form">
                     Verified by
                 </div>
                 <div class="text_search_form ">
-                    <input type="text" class="text_input" name="sc_user"  list="userList"
-                    value= "{{ search_criteria_dictionary.get('user').0 }}">
+                    <input type="text" class="text_input form-control" name="sc_user"  list="userList"
+                    value= "{{ search_criteria_dictionary.get('user').0 }}" form="form_investigations_search">
                     <datalist id="userList">
                         {% for i in user_list %}
                             <option>{{ i }}</option>
@@ -101,15 +109,15 @@
 
             <!-- Add Categories search input box-->
             {% for x,y in category_dict.items() %}
-            <div class="dict_search">
+            <div class="dict_search search_item_group">
 
                     
                 <div class="label_search_form">
                     KM {{ x }}:
                 </div>
                 <div class="text_search_form">
-                    <input type="text" class="text_input" name="{{ 'sc_' + x }}"  list="categoryList"
-                        value= "{{ y.0 }}">
+                    <input type="text" class="text_input form-control" name="{{ 'sc_' + x }}"  list="categoryList"
+                        value= "{{ y.0 }}" form="form_investigations_search">
                     <datalist id="categoryList">
                         {% for i in category_list %}
                             <option>{{ i }}</option>
@@ -119,7 +127,7 @@
                 {% if len(category_dict)>1 %}
                 <div class="checkbox_search_form">
                     <!--No checkbox becuase it would be very difficult to exact filter on column with so much csv data-->
-                    <input type="submit" class="search_remove_category_button" name="remove_category" value="{{ x }}">
+                    <input type="submit" class="search_remove_category_button form-control" name="remove_category" value="{{ x }}" form="form_investigations_search">
                 </div>
                 {% else %}
                 <div></div>
@@ -127,30 +135,39 @@
             </div>
             {% endfor %}
 
-            <div class="add_cateogry_button">
-                <input type="submit" class="search_add_category_button" name="add_category" 
-                    value="Add Category">
+            <div class="search_buttons_group">
+                <div class=" search_buttons_group_sub">
+                    <input type="submit" class=" btn_width btn btn-primary" name="add_category" 
+                        value="Add Category" form="form_investigations_search">
+                </div><!-- add_cateogry_button -->
+    
+                <div class="search_button search_buttons_group_sub">
+                    <div class="btn_div">
+                        <input type="submit" name="refine_search_button" value="Refine Search" form="form_investigations_search" class="btn_width btn btn-info ">
+                    </div>
+                    
+                    <div class="search_checkbox">
+                        {% if limit_flag=='true' %}
+                        <input type="checkbox" name="limit_flag" value="true" checked={{ limit_flag }} form="form_investigations_search"> Limit to 100 records
+                        {% else %}
+                        <input type="checkbox" name="limit_flag" value="true" form="form_investigations_search"> Limit to 100 records
+                        {% endif %}
+                    </div>
+
+                </div><!-- search_button -->
             </div>
 
-            <div class="search_button">
-                <input type="submit" name="refine_search_button" value="Refine Search">
-				{% if limit_flag=='true' %}
-				<input type="checkbox" name="limit_flag" value="true" checked={{ limit_flag }}> Limit to 100 records
-				{% else %}
-				<input type="checkbox" name="limit_flag" value="true" > Limit to 100 records
-				{% endif %}
-            </div>
         </div>
             
-    </form>
+    <!-- </form> -->
     </div>
-</section>
+</div>
 
 
 
-<section class="investigation_table">
+<div class="search_table">
     <div class="container">
-        <form method="POST" action="" enctype="multipart/form-data">
+        <!-- <form method="POST" action="" enctype="multipart/form-data"> -->
         {% if no_hits_flag %}
         No Investigations found with selected criteria
         {% else %}
@@ -172,7 +189,7 @@
                     {% for row in table_data %}
                         <tr>
                             <td><input type="submit" class="dash_id_button"
-                                name="view" value="{{ row[column_names[0]] }}"></td>
+                                name="view" value="{{ row[column_names[0]] }}" form="form_investigations_search"></td>
                             {% for index in range(1,len(column_names)) %}
                                 <td ><div class="td_characteristics">
                                     {{ row[column_names[index]] }}
@@ -186,26 +203,27 @@
             </div>
         {% endif %}
 
-        </form>
+        <!-- </form> -->
     </div>
-</section>
-
+</div>
+</div>
+</div>
 
     
 
 <!-- Datatable -->
-<script src="../static/js/jquery-3.1.1.slim.min.js"></script>
-<link rel="stylesheet" type="text/css" href="../static/css/css/jquery.dataTables.min.css">
-<link rel="stylesheet" type="text/css" href="../static/css/css/responsive.dataTables.min.css">
-<script src="../static/js/moment.min.js"></script>
-<script type="text/javascript" src="../static/js/jquery.dataTables-1.1.20.min.js"></script>
-<script type="text/javascript" src="../static/js/dataTables.responsive.min.js"></script>
-<script type="text/javascript" src="../static/js/datetime.js"></script>
+<script src="../static/customAndOldFiles/js/jquery-3.1.1.slim.min.js"></script>
+<link rel="stylesheet" type="text/css" href="../static/customAndOldFiles/css/jquery.dataTables.min.css">
+<link rel="stylesheet" type="text/css" href="../static/customAndOldFiles/css/responsive.dataTables.min.css">
+<script src="../static/customAndOldFiles/js/moment.min.js"></script>
+<script type="text/javascript" src="../static/customAndOldFiles/js/jquery.dataTables-1.1.20.min.js"></script>
+<script type="text/javascript" src="../static/customAndOldFiles/js/dataTables.responsive.min.js"></script>
+<script type="text/javascript" src="../static/customAndOldFiles/js/datetime.js"></script>
 
 
 
 <!-- for modals-->
-<script src="../static/js/bootstrap.min.js"></script>
+<script src="../static/customAndOldFiles/js/bootstrap.min.js"></script>
 
 
 <script type="text/javascript">
