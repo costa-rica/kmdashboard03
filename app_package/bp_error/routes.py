@@ -66,9 +66,6 @@ def handle_500(err):
     return render_template('error_template.html', error_number="500", error_message=error_message)
 
 
-#####################
-# These not working #
-#####################
 if os.environ.get('CONFIG_TYPE')=='prod':
     @bp_error.app_errorhandler(AttributeError)
     def error_attribute(AttributeError):
@@ -83,6 +80,12 @@ if os.environ.get('CONFIG_TYPE')=='prod':
         error_message_2 = KeyError)
 
     @bp_error.app_errorhandler(TypeError)
+    def error_key(KeyError):
+        error_message = f"Could be anything... ¯\_(ツ)_/¯  ... try again or send email to {current_app.config['EMAIL_DASH_AND_DATA']}."
+        return render_template('error_template.html', error_number="Did you login?", error_message=error_message,
+        error_message_2 = TypeError)
+
+    @bp_error.app_errorhandler(FileNotFoundError)
     def error_key(KeyError):
         error_message = f"Could be anything... ¯\_(ツ)_/¯  ... try again or send email to {current_app.config['EMAIL_DASH_AND_DATA']}."
         return render_template('error_template.html', error_number="Did you login?", error_message=error_message,

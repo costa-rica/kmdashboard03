@@ -62,3 +62,8 @@ def temporarily_down():
     return render_template('main/temporarily_down.html')
 
 
+
+@bp_main.route("/test_404", methods=["GET","POST"])
+def test_404():
+    raise FileNotFoundError("File not found") 
+
