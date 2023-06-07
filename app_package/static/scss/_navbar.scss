@@ -73,29 +73,16 @@
       // width:100%;
     }
 
-    .page_title {
-      width: 100%;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      color: var(--bs-gray-400);
+
+    .page_title_large{
+      display:none
     }
-
-    // .middle_nav_div {
-    //     display: none;
-    //   // h1{font-size: .9rem;}
-    //   // font-size: .7rem;
-    // }
-
-
 
     /* Navbar Right */
     .nav_right {
-      // background-color: green;
       display: flex;
       justify-content: center;
       align-items: center;
-
     }
 
     nav.btn_menu {
@@ -103,13 +90,9 @@
     }
 
     .nav_menu {
-      // position: absolute;
       cursor: pointer;
-      // right:1rem;
       height: 5rem;
     }
-
-    // nav.menu-btn{display:block;}
     .nav_exit_div {
       display: flex;
       justify-content: end;
@@ -120,12 +103,6 @@
       display: none;
     }
 
-    // .mobile-menu{
-    //     position: absolute;
-    //     cursor: pointer;
-    //     right:1rem;
-    //     height: 5rem;
-    // }
     nav {
       position: fixed;
       z-index: 1;
@@ -217,7 +194,7 @@
 /* Footer */
 .footer {
   margin-top: auto;
-  padding: 1rem 3rem var(--nav-height) 3rem;
+  padding: 1rem 1rem var(--nav-height) 3rem;
   background-color: var(--bs-gray-200);
 
   // height: auto !important;
@@ -234,74 +211,33 @@
 
       display: flex;
       justify-content: end;
-      padding-right: 3rem;
+      // padding-right: 3rem;
     }
-    .contact_nick{font-size: 1.5rem;}
+    .contact_nick{font-size: 1rem;}
   }
 }
 
 
 @media screen and (min-width: 768px) {
-  section.navbar_section {
-    .navbar_custom {
-      height: 9rem;
-
-      .left_and_middle {
+  .navbar_super{
+    .nav_center{
+      .page_title_large{
+        width: 100%;
         display: flex;
         justify-content: center;
         align-items: center;
-        padding: 0 0 1rem 0;
-        width: 80%;
-
-        .nav_left {
-          flex: 1;
-
-          .ws_logo_big {
-            height: 7rem;
-            display: inline;
-            border-radius: .75rem;
-          }
-
-          .ws_logo_small {
-            display: none;
-          }
-        }
-
-        .middle_nav_div {
-          flex: 5;
-          text-align: center;
-          display: inline;
-
-          h1 {
-            font-size: 4rem;
-            margin-bottom: 0;
-            color: var(--bs-gray-200)
-          }
-
-          h3 {
-            color: var(--bs-gray-200)
-          }
-        }
-      }
-
-      nav {
-        width: 30%;
-        max-width: 20rem;
-        font-size: 2rem;
-
-        .dropdown-item {
-          font-size: 2rem;
-        }
-      }
-
-      .mobile-menu {
-        right: 1rem;
-        height: 100%;
+        color: var(--bs-gray-400);
       }
     }
+
+  }
+  .footer{
+    padding: 1rem 2rem var(--nav-height) 3rem;
+    .footer_link_item {
+      padding-right: 3rem;
+    }
+
+    .contact_nick{font-size: 1.5rem;}
   }
 
-  .footer {
-    font-size: 2rem;
-  }
 }

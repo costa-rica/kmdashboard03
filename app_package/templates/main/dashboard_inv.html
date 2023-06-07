@@ -3,222 +3,245 @@
 {% block main %}
 <form method="POST" enctype="multipart/form-data" id="form_investigations_dash"></form>
 
-<div class="main">
+<!-- <div class="main"> -->
+    <div class="space_for_navbar_and_footer flex_center">
 
+    <div class="dashboard_investigations_page">
 
-
-<div class="dashboard_investigations_page">
-    
-    <div class="container dashboard">
-        <!-- <form method="POST" action="" enctype="multipart/form-data"> -->
+        <div class="container dashboard">
             {{ inv_form.csrf_token }}
-        <div class="above_dash">
-            Viewing KM Dash Investigation ID: {{ inv_id_for_dash }}
-            <a href="{{ url_for('bp_investigations.search_investigations', query_file_name='current_query_inv.txt') }}">Back to query</a>
-        </div>
-
-                
-        <div class="investigation_entry_top">
-            {% for i, j in inv_entry_top_list %}
-                {% if len(str(j))>23 %}
-                <div >
-                    {% if len(str(i))>10 %}
-                        <div class="inv_attr_title_wider">{{ i }}:</div>
-                    {% else %}
-                        <div class="inv_attr_title">{{ i }}:</div>
-                    {% endif %}
-                    <input type="text" class="wider_input form-control" name="{{ 'inv_' + i }}" value="{{ j }}" readonly form="form_investigations_dash">
+            <div class="title_and_stuff hundred_flex and_right and_wrap ">
+                <div class="hundred_flex">
+                    <h4>Viewing KM Dash Investigation ID: {{ inv_id_for_dash }}</h4>
                 </div>
-            {% else %}
-                <div >
-                    {% if len(str(i))>10 %}
-                        <div class="inv_attr_title_wider">{{ i }}:</div>
-                    {% else %}
-                        <div class="inv_attr_title">{{ i }}:</div>
-                    {% endif %}
-                    <input type="text" class="form-control" name="{{ 'inv_' + i }}" value="{{ j }}" readonly form="form_investigations_dash">
+                <div class="hundred_flex and_right">
+                    <a
+                    href="{{ url_for('bp_investigations.search_investigations', query_file_name='current_query_inv.txt') }}">Back
+                    to query</a>
                 </div>
-                {% endif %}
-            {% endfor %}
-        </div>
-
-
-
-
-        <div class="investigation_entery_middle">
-            <div class="inv_subject">
-                <label>Subject:</label>
-                <input type="text" class="form-control" name="inv_subject" value="{{ dash_inv_list[9] }}" readonly form="form_investigations_dash">
             </div>
 
-            <label class="inv_summary">
-                Summary:
-                <textarea class="" name="inv_summary_textarea form-control"  row=3 readonly form="form_investigations_dash">{{ dash_inv_list[10] }}</textarea>
-            </label>
-            {% if dash_inv_list[14] %}
-            <label class="inv_summary">
-                Assigned Categories:
-                <textarea class="" name="inv_summary_textarea form-control"  row=3 readonly form="form_investigations_dash">{{ str(dash_inv_list[14])[1:-1] }}</textarea>
-            </label>
-            {% endif %}
+            <div class="std_framing">
 
-            <label class="inv_km_notes">
-                KM Notes:
-                <textarea class="" name="inv_km_notes form-control" rows=3  form="form_investigations_dash">{{ dash_inv_list[11] }}</textarea>
-            </label>
             
-
-
-
-            <div class="link_records_div">
+            <div class="investigation_entry_top">
+                {% for i, j in inv_entry_top_list %}
+                {% if len(str(j))>23 %}
                 <div>
-                    Link this investigation to another record:<br/>
-                    {{ inv_form.record_type }}<br/>
+                    {% if len(str(i))>10 %}
+                    <div class="inv_attr_title_wider">{{ i }}:</div>
+                    {% else %}
+                    <div class="inv_attr_title">{{ i }}:</div>
+                    {% endif %}
+                    <input type="text" class="wider_input form-control" name="{{ 'inv_' + i }}" value="{{ j }}" readonly
+                        form="form_investigations_dash">
+                </div>
+                {% else %}
+                <div>
+                    {% if len(str(i))>10 %}
+                    <div class="inv_attr_title_wider">{{ i }}:</div>
+                    {% else %}
+                    <div class="inv_attr_title">{{ i }}:</div>
+                    {% endif %}
+                    <input type="text" class="form-control" name="{{ 'inv_' + i }}" value="{{ j }}" readonly
+                        form="form_investigations_dash">
+                </div>
+                {% endif %}
+                {% endfor %}
+            </div>
 
-                    <div class="">
-                        <input type="text" class="text_input_wide form-control" name="records_list"  list="records_list3_list" form="form_investigations_dash">
-                        <datalist id="records_list3_list">
-                            {% for i in records_array %}
-                            <option >{{ i.shows_up }}</option>
-                            {% endfor %}
-                        </datalist>
+
+
+
+            <div class="investigation_entery_middle">
+                <div class="inv_subject">
+                    <label>Subject:</label>
+                    <input type="text" class="form-control" name="inv_subject" value="{{ dash_inv_list[9] }}" readonly
+                        form="form_investigations_dash">
+                </div>
+
+                <label class="inv_summary">
+                    Summary:
+                    <textarea class="" name="inv_summary_textarea form-control" row=3 readonly
+                        form="form_investigations_dash">{{ dash_inv_list[10] }}</textarea>
+                </label>
+                {% if dash_inv_list[14] %}
+                <label class="inv_summary">
+                    Assigned Categories:
+                    <textarea class="" name="inv_summary_textarea form-control" row=3 readonly
+                        form="form_investigations_dash">{{ str(dash_inv_list[14])[1:-1] }}</textarea>
+                </label>
+                {% endif %}
+
+                <label class="inv_km_notes">
+                    KM Notes:
+                    <textarea class="" name="inv_km_notes form-control" rows=3
+                        form="form_investigations_dash">{{ dash_inv_list[11] }}</textarea>
+                </label>
+
+
+
+
+                <div class="link_records_div">
+                    <div>
+                        Link this investigation to another record:<br />
+                        {{ inv_form.record_type }}<br />
+
+                        <div class="">
+                            <input type="text" class="text_input_wide form-control" name="records_list"
+                                list="records_list3_list" form="form_investigations_dash">
+                            <datalist id="records_list3_list">
+                                {% for i in records_array %}
+                                <option>{{ i.shows_up }}</option>
+                                {% endfor %}
+                            </datalist>
+                        </div>
+
+                        <input type="submit" class="update_inv link_record_button" name="link_record"
+                            value="Link Record" form="form_investigations_dash">
+
+                    </div>
+                    <br />
+
+                    <div class="file_list">
+                        {% if dash_inv_list[15] %}
+                        <h4><u>Linked Records:</u></h4>
+                        {% endif %}
+                        {% for i in dash_inv_list[15] %}
+
+
+                        {{ i }}
+                        <a class="remove-image"
+                            href="{{url_for('bp_investigations.delete_linked_record_investigations', inv_id_for_dash=inv_id_for_dash,linked_record= i )}}"
+                            style="display: inline;">&#215;</a>
+                        <br />
+                        {% endfor %}
                     </div>
 
-                    <input type="submit" class="update_inv link_record_button" name="link_record" value="Link Record" form="form_investigations_dash">
-
                 </div>
-                <br/>
-                
-                <div class="file_list">
-                    {% if dash_inv_list[15] %}
-                    <h4><u>Linked Records:</u></h4>
-                    {% endif %}
-                    {% for i in dash_inv_list[15] %}
-                        
-                        
-                    {{ i }}
-                    <a class="remove-image" 
-                        href="{{url_for('bp_investigations.delete_linked_record_investigations', inv_id_for_dash=inv_id_for_dash,linked_record= i )}}" 
-                        style="display: inline;">&#215;</a>
-                    <br/>
-                    {% endfor %}
-                </div>
-
             </div>
-        </div>
 
 
 
-        <div class="investigation_entry_bottom">
-            <div class="inv_files">
-                <div class="file_list">
-                    <h4><u>Files</u></h4>
-                    {% if len(dash_inv_list[13])>0 %}
+            <div class="investigation_entry_bottom">
+                <div class="inv_files">
+                    <div class="file_list">
+                        <h4><u>Files</u></h4>
+                        {% if len(dash_inv_list[13])>0 %}
 
                         {%for file in dash_inv_list[13] %}
-                        <a href="{{ url_for('static', filename='files/' + current_inv_files_dir_name + '/' + file ) }}"> {{ file }} </a>
+                        <a href="{{ url_for('static', filename='files/' + current_inv_files_dir_name + '/' + file ) }}">
+                            {{ file }} </a>
                         <!--https://codepen.io/eliorivero/pen/zEFqb-->
-                        <a class="remove-image" 
-                        href="{{ url_for('bp_investigations.delete_file_inv', inv_id_for_dash=inv_id_for_dash, filename = file) }}" 
-                        style="display: inline;">&#215;</a>
-                        <br/>
+                        <a class="remove-image"
+                            href="{{ url_for('bp_investigations.delete_file_inv', inv_id_for_dash=inv_id_for_dash, filename = file) }}"
+                            style="display: inline;">&#215;</a>
+                        <br />
                         {% endfor %}
+                        {% endif %}
+                    </div>
+
+                    <div class="file_input">
+                        <input type="file" name="investigation_file" accept=".pdf, .doc, .docx" multiple
+                            form="form_investigations_dash">
+                    </div>
+                </div>
+
+
+
+                <div class="inv_update">
+                    {% if inv_id_for_dash =='no investigations found' %}
+                    No record to update
+                    {% else %}
+                    <input type="submit" class="update_inv" name="update_inv" value="Update">
+
+                    <div class="verify_box_and_label">
+                        <input type="checkbox" class="unique_name_checkbox" name="verified_by_user"
+                            value="{{ current_user.email }}" style="background-color: red;" {{ checkbox_verified }}
+                            form="form_investigations_dash" />
+                        <label for="verified_by_user">User has verified</label>
+
+                    </div>
+
+                    <div class="verified_list">
+                        {% for i in verified_by_list %}
+                        <span> {{ i[0] }}</span> <span> {{ i[1] }}</span><br />
+                        {% endfor %}
+                    </div>
                     {% endif %}
-                </div>
-                
-                <div class="file_input">
-                    <input type="file" name="investigation_file" accept=".pdf, .doc, .docx" multiple form="form_investigations_dash">
-                </div>
-            </div>
 
-
-
-            <div class="inv_update">
-                {% if inv_id_for_dash =='no investigations found' %}
-                No record to update
-                {% else %}
-                <input type="submit" class="update_inv" name="update_inv" value="Update">
-
-                <div class="verify_box_and_label">
-                    <input type="checkbox" class="unique_name_checkbox" name="verified_by_user"
-                        value="{{ current_user.email }}" style="background-color: red;" {{ checkbox_verified }} form="form_investigations_dash"/>
-                    <label for="verified_by_user">User has verified</label>
-                    
+                    <label class="inv_date_updated">
+                        <span class="span_text"> This investigation was updated last: {{ dash_inv_list[12] }} </span>
+                    </label>
                 </div>
 
-                <div class="verified_list">
-                    {% for i in verified_by_list %}
-                    <span> {{ i[0] }}</span> <span> {{ i[1] }}</span><br/>
-                    {% endfor %}
-                </div>
-                {% endif %}
-                
-                <label class="inv_date_updated" >
-                    <span class="span_text"> This investigation was updated last:  {{ dash_inv_list[12] }} </span>
-                </label>
-            </div>
+
+                <div class="km_categories">
+                    <h4><u>Categories</u></h4>
+                    <br />
 
 
-            <div class="km_categories">
-                <h4><u>Categories</u></h4>
-                <br/>
-
-
-                {% for category, no_space in category_group_dict_no_space.items() %}
+                    {% for category, no_space in category_group_dict_no_space.items() %}
                     <!--put first modal here-->
-                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="{{ '#' + no_space }}" form="form_investigations_dash">
+                    <button type="button" class="btn btn-primary" data-bs-toggle="modal"
+                        data-bs-target="{{ '#' + no_space }}" form="form_investigations_dash">
                         {{ category }}
                     </button>
 
                     <!-- Modal -->
-                    <div class="modal fade" id="{{ no_space }}" tabindex="-1" aria-labelledby="{{ no_space + 'Label' }}" aria-hidden="true">
+                    <div class="modal fade" id="{{ no_space }}" tabindex="-1" aria-labelledby="{{ no_space + 'Label' }}"
+                        aria-hidden="true">
                         <div class="modal-dialog">
-                        <div class="modal-content">
-                            <div class="modal-header">
-                            <h5 class="modal-title" id="{{ no_space + 'Label' }}"> {{ category }}</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                            </div>
-                            <div class="modal-body">
-                                <div class="km_categories_checkboxes">
-                                    {% for i in category_list_dict[category] %}
-                                    
-                                    <div class="checkbox_group">
-                                        {% if i in dash_inv_list[14] %}
-                                        <input type="checkbox"  name="{{ 'cat_' + i }}" id="{{ i }}" value="Yes" checked form="form_investigations_dash"/>
-                                        <label for="{{ i }}">{{ i }}</label>
-                                        {% else %}
-                                        <input type="checkbox"  name="{{ 'cat_' + i }}" id="{{ i }}" value="Yes" form="form_investigations_dash"/>
-                                        <label for="{{ i }}">{{ i }}</label>
-                                        {% endif %}
-                                    </div>
-                                    {% endfor %}
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="{{ no_space + 'Label' }}"> {{ category }}</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                        aria-label="Close"></button>
                                 </div>
+                                <div class="modal-body">
+                                    <div class="km_categories_checkboxes">
+                                        {% for i in category_list_dict[category] %}
 
+                                        <div class="checkbox_group">
+                                            {% if i in dash_inv_list[14] %}
+                                            <input type="checkbox" name="{{ 'cat_' + i }}" id="{{ i }}" value="Yes"
+                                                checked form="form_investigations_dash" />
+                                            <label for="{{ i }}">{{ i }}</label>
+                                            {% else %}
+                                            <input type="checkbox" name="{{ 'cat_' + i }}" id="{{ i }}" value="Yes"
+                                                form="form_investigations_dash" />
+                                            <label for="{{ i }}">{{ i }}</label>
+                                            {% endif %}
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary"
+                                        data-bs-dismiss="modal">Close</button>
+                                    <!--<button type="button" class="btn btn-primary">Save Categories</button>-->
+                                </div>
                             </div>
-                            <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                            <!--<button type="button" class="btn btn-primary">Save Categories</button>-->
-                            </div>
-                        </div>
                         </div>
                     </div>
-                {% endfor %}
+                    {% endfor %}
 
 
-            
 
-                
 
+
+
+
+
+                </div>
 
 
             </div>
-
-
         </div>
-
-        <!-- </form> -->
+            <!-- </form> -->
+        </div>
     </div>
-</div>
 
 </div><!-- main -->
 <!-- for modals-->
@@ -230,19 +253,19 @@
 
     let record_type_select = document.getElementById('record_type');
     let records_list_select = document.getElementById('records_list3_list');
-    
 
-    record_type_select.onchange = function(){
-        record_type= record_type_select.value;
-        
-        
-        fetch('/get_record/' + record_type +'/' + inv_id_for_dash).then(function(response){
-            response.json().then(function(data){
+
+    record_type_select.onchange = function () {
+        record_type = record_type_select.value;
+
+
+        fetch('/get_record/' + record_type + '/' + inv_id_for_dash).then(function (response) {
+            response.json().then(function (data) {
                 let optionHTML = '';
-                for(let record of data.records) {
+                for (let record of data.records) {
                     optionHTML += '<option >' + record.shows_up + '</option>';
                 }
-                
+
                 records_list_select.innerHTML = optionHTML;
             });
         });
@@ -250,7 +273,7 @@
     }
 </script>
 <!-- tutorial used to build dynamic dropdowns for records linking https://www.youtube.com/watch?v=I2dJuNwlIH0 -->
-<!--This makes an alert popup in javascript--> 
+<!--This makes an alert popup in javascript-->
 <!--
     inv_or_re_select.onchange = function(){
         inv_or_re= inv_or_re_select.value;

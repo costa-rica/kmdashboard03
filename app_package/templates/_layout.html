@@ -28,17 +28,15 @@
 
 
       <div class="nav_center">
-        {% if rincon_name %}
-        <div class="page_title">
-          <h1>{{ rincon_name }}</h1>
-        </div><!-- page_title -->
-          {% else %}
-          <div class="page_title">
+        
+
+         
+          <div class="page_title_large">
             <h1>KM / NHTSA Dashboard </h1>
           </div><!-- page_title -->
           
 
-        {% endif %}<!-- if rincon_name -->
+        
 
         {% if current_user %}
         {{ current_user.username }}
