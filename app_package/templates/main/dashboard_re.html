@@ -1,31 +1,32 @@
 {% extends "_layout.html" %}
-{% block title %} Investigation Dash {% endblock %}
+{% block title %} Recalls Dash {% endblock %}
 {% block main %}
-<form method="POST" enctype="multipart/form-data" id="form_investigations_dash"></form>
+<form method="POST" enctype="multipart/form-data" id="form_recalls_dash"></form>
 
-<!-- <div class="main"> -->
 <div class="space_for_navbar_and_footer ">
 
-    <div class="dashboard_investigations_page">
+    <div class="dashboard_recalls_page">
 
-        <div class="container ">
-            {{ inv_form.csrf_token }}
+        <div class="container">
+
+
             <div class="title_and_stuff hundred_flex and_right and_wrap ">
                 <div class="hundred_flex">
-                    <h4>Viewing KM Dash Investigation ID: {{ inv_id_for_dash }}</h4>
+                    <h4>Viewing KM Dash Recall Record ID: {{ re_id_for_dash }}</h4>
                 </div>
                 <div class="hundred_flex and_right">
-                    <a
-                        href="{{ url_for('bp_investigations.search_investigations', query_file_name='current_query_inv.txt') }}">Back
-                        to query</a>
+                    <a href="{{ url_for('bp_recalls.search_recalls', query_file_name='current_query_re.txt') }}">Back to
+                        query</a>
                 </div>
-            </div><!-- title_and_stuff -->
+
+            </div><!-- title_and_stuff hundred_flex and_right and_wrap -->
 
             <div class="std_framing">
 
 
                 <div class="investigation_entry_top">
-                    {% for i, j in inv_entry_top_list %}
+                    {% for i, j in re_entry_top_list %}
+
                     {% if len(str(j))>23 %}
                     <div>
                         {% if len(str(i))>10 %}
@@ -33,8 +34,8 @@
                         {% else %}
                         <div class="inv_attr_title">{{ i }}:</div>
                         {% endif %}
-                        <input type="text" class="wider_input form-control" name="{{ 'inv_' + i }}" value="{{ j }}"
-                            readonly form="form_investigations_dash">
+                        <input type="text" class="wider_input form-control" name="{{ 're_' + i }}" value="{{ j }}"
+                            readonly form="form_recalls_dash">
                     </div>
                     {% else %}
                     <div>
@@ -43,55 +44,56 @@
                         {% else %}
                         <div class="inv_attr_title">{{ i }}:</div>
                         {% endif %}
-                        <input type="text" class="form-control" name="{{ 'inv_' + i }}" value="{{ j }}" readonly
-                            form="form_investigations_dash">
+                        <input type="text" class="form-control" name="{{ 're_' + i }}" value="{{ j }}" readonly
+                            form="form_recalls_dash">
                     </div>
                     {% endif %}
+
                     {% endfor %}
                 </div>
 
 
-
-
                 <div class="investigation_entery_middle">
-                    <div class="inv_subject">
-                        <label>Subject:</label>
-                        <input type="text" class="form-control" name="inv_subject" value="{{ dash_inv_list[9] }}"
-                            readonly form="form_investigations_dash">
-                    </div>
+                    {% for i, j in re_entry_top2_list %}
+                    <div class="re_long1">
+                        <label>{{ i }}:</label>
+                        {% if len(str(j))>127 %}
+                        
+                        <textarea id="note" name="{{ 're_' + i }}" readonly class="form-control">{{ j }}</textarea>
+                        {% else %}
+                        
+                        <input type="text" name="{{ 're_' + i }}" value="{{ j }}" readonly
+                            form="form_recalls_dash" class="form-control">
+                        {% endif %}
 
-                    <label class="inv_summary">
-                        Summary:
-                        <textarea class="form-control" name="inv_summary_textarea" row=3 readonly
-                            form="form_investigations_dash">{{ dash_inv_list[10] }}</textarea>
-                    </label>
-                    {% if dash_inv_list[14] %}
-                    <label class="inv_summary">
-                        Assigned Categories:
-                        <textarea class="form-control" name="inv_summary_textarea " row=3 readonly
-                            form="form_investigations_dash">{{ str(dash_inv_list[14])[1:-1] }}</textarea>
-                    </label>
+
+
+                    </div>
+                    {% endfor %}
+                    {% if dash_re_list[27] %}
+                    <div class="re_long1">
+                        <label>Assigned Categories:</label>
+                        <textarea readonly form="form_recalls_dash"
+                            class="form-control">{{ str(dash_re_list[27])[1:-1] }}</textarea>
+                    </div>
                     {% endif %}
 
                     <label class="inv_km_notes">
                         KM Notes:
-                        <textarea class="form-control" name="inv_km_notes" rows=3
-                            form="form_investigations_dash">{{ dash_inv_list[11] }}</textarea>
+                        <textarea class="form-control" name="re_km_notes" rows=3
+                            form="form_recalls_dash">{{ dash_re_list[24] }}</textarea>
                     </label>
-
-
 
                     <div class="link_records_div_super">
 
 
                         <div class="link_records_div">
                             <div>
-                                Link this investigation to another record:<br />
-                                {{ inv_form.record_type }}<br />
-
-                                <div class="text_input_links">
+                                Link this recall to another record:<br />
+                                {{ re_form.record_type }}<br /> <!-- Textbox 1 (dropdown, not typeable )-->
+                                <div class="">
                                     <input type="text" class="text_input_wide form-control" name="records_list"
-                                        list="records_list3_list" form="form_investigations_dash">
+                                        list="records_list3_list" form="form_recalls_dash">
                                     <datalist id="records_list3_list">
                                         {% for i in records_array %}
                                         <option>{{ i.shows_up }}</option>
@@ -99,24 +101,22 @@
                                     </datalist>
                                 </div>
                                 <div class="link_record_btn_div">
-                                    <input type="submit" class="btn btn-secondary" name="link_record"
-                                        value="Link Record" form="form_investigations_dash">
+                                    <input type="submit" class="update_inv link_record_button" name="link_record"
+                                        value="Link Record" form="form_recalls_dash">
                                 </div><!-- link_record_btn_div -->
-
-
                             </div>
                             <br />
 
                             <div class="file_list">
-                                {% if dash_inv_list[15] %}
+                                {% if dash_re_list[28] %}
                                 <h4><u>Linked Records:</u></h4>
                                 {% endif %}
-                                {% for i in dash_inv_list[15] %}
+                                {% for i in dash_re_list[28] %}
 
 
                                 {{ i }}
                                 <a class="remove-image"
-                                    href="{{url_for('bp_investigations.delete_linked_record_investigations', inv_id_for_dash=inv_id_for_dash,linked_record= i )}}"
+                                    href="{{url_for('re_blueprint.delete_linked_record_recalls', re_id_for_dash=re_id_for_dash,linked_record= i )}}"
                                     style="display: inline;">&#215;</a>
                                 <br />
                                 {% endfor %}
@@ -132,15 +132,15 @@
                     <div class="inv_files">
                         <div class="file_list">
                             <h4><u>Files</u></h4>
-                            {% if len(dash_inv_list[13])>0 %}
+                            {% if len(dash_re_list[26])>0 %}
 
-                            {%for file in dash_inv_list[13] %}
+                            {%for file in dash_re_list[26] %}
                             <a
-                                href="{{ url_for('static', filename='files/' + current_inv_files_dir_name + '/' + file ) }}">
+                                href="{{ url_for('static', filename='files/'+ current_re_files_dir_name +'/' + file ) }}">
                                 {{ file }} </a>
                             <!--https://codepen.io/eliorivero/pen/zEFqb-->
                             <a class="remove-image"
-                                href="{{ url_for('bp_investigations.delete_file_inv', inv_id_for_dash=inv_id_for_dash, filename = file) }}"
+                                href="{{ url_for('re_blueprint.delete_file_re', re_id_for_dash=re_id_for_dash, filename = file) }}"
                                 style="display: inline;">&#215;</a>
                             <br />
                             {% endfor %}
@@ -148,23 +148,24 @@
                         </div>
 
                         <div class="file_input">
-                            <input type="file" name="investigation_file" accept=".pdf, .doc, .docx" multiple
-                                form="form_investigations_dash" class="btn">
+                            <input type="file" name="recall_file" accept=".pdf, .doc, .docx" multiple
+                                form="form_recalls_dash" class="btn">
                         </div>
                     </div>
 
 
 
                     <div class="inv_update">
-                        {% if inv_id_for_dash =='no investigations found' %}
+                        {% if re_id_for_dash =='no recalls found' %}
                         No record to update
                         {% else %}
-                        <input type="submit" class="btn btn-primary" name="update_inv" value="Update">
+                        <input type="submit" class="btn btn-primary" name="update_re" value="Update"
+                            form="form_recalls_dash">
 
                         <div class="verify_box_and_label">
                             <input type="checkbox" class="unique_name_checkbox" name="verified_by_user"
                                 value="{{ current_user.email }}" style="background-color: red;" {{ checkbox_verified }}
-                                form="form_investigations_dash" />
+                                form="form_recalls_dash" />
                             <label for="verified_by_user">User has verified</label>
 
                         </div>
@@ -177,8 +178,7 @@
                         {% endif %}
 
                         <label class="inv_date_updated">
-                            <span class="span_text"> This investigation was updated last: {{ dash_inv_list[12] }}
-                            </span>
+                            <span class="span_text"> This investigation was updated last: {{ dash_re_list[25] }} </span>
                         </label>
                     </div>
 
@@ -191,9 +191,10 @@
                         {% for category, no_space in category_group_dict_no_space.items() %}
                         <!--put first modal here-->
                         <button type="button" class="btn btn-primary" data-bs-toggle="modal"
-                            data-bs-target="{{ '#' + no_space }}" form="form_investigations_dash">
+                            data-bs-target="{{ '#' + no_space }}">
                             {{ category }}
                         </button>
+
 
                         <!-- Modal -->
                         <div class="modal fade" id="{{ no_space }}" tabindex="-1"
@@ -210,13 +211,13 @@
                                             {% for i in category_list_dict[category] %}
 
                                             <div class="checkbox_group">
-                                                {% if i in dash_inv_list[14] %}
+                                                {% if i in dash_re_list[27] %}
                                                 <input type="checkbox" name="{{ 'cat_' + i }}" id="{{ i }}" value="Yes"
-                                                    checked form="form_investigations_dash" />
+                                                    checked form="form_recalls_dash" />
                                                 <label for="{{ i }}">{{ i }}</label>
                                                 {% else %}
                                                 <input type="checkbox" name="{{ 'cat_' + i }}" id="{{ i }}" value="Yes"
-                                                    form="form_investigations_dash" />
+                                                    form="form_recalls_dash" />
                                                 <label for="{{ i }}">{{ i }}</label>
                                                 {% endif %}
                                             </div>
@@ -237,26 +238,24 @@
 
 
 
-
-
-
-
                     </div>
 
 
                 </div>
+
             </div><!-- std_framing -->
 
         </div><!-- container -->
-    </div><!-- dashboard_investigations_page -->
-
+    </div><!-- dashboard_recalls_page -->
 </div><!-- space_for_navbar_and_footer -->
+
+
 <!-- for modals-->
 <script src="../static/customAndOldFiles/js/bootstrap.min.js"></script>
 
 <!-- for Dropdown-->
 <script>
-    var inv_id_for_dash = "{{ inv_id_for_dash }}"
+    var re_id_for_dash = "{{ re_id_for_dash }}"
 
     let record_type_select = document.getElementById('record_type');
     let records_list_select = document.getElementById('records_list3_list');
@@ -266,11 +265,11 @@
         record_type = record_type_select.value;
 
 
-        fetch('/get_record/' + record_type + '/' + inv_id_for_dash).then(function (response) {
+        fetch('/get_record_recall/' + record_type + '/' + re_id_for_dash).then(function (response) {
             response.json().then(function (data) {
                 let optionHTML = '';
                 for (let record of data.records) {
-                    optionHTML += '<option >' + record.shows_up + '</option>';
+                    optionHTML += '<option>' + record.shows_up + '</option>';
                 }
 
                 records_list_select.innerHTML = optionHTML;
@@ -279,17 +278,6 @@
 
     }
 </script>
-<!-- tutorial used to build dynamic dropdowns for records linking https://www.youtube.com/watch?v=I2dJuNwlIH0 -->
-<!--This makes an alert popup in javascript-->
-<!--
-    inv_or_re_select.onchange = function(){
-        inv_or_re= inv_or_re_select.value;
-        alert(inv_or_re);
-        
-    }-->
-<!--Not use but might be helpful in future https://stackoverflow.com/questions/59486881/python-flask-dynamic-dropdown-list-->
-
-
 
 
 {% endblock %}

@@ -22,7 +22,7 @@
 
                         <div class="search_item_group_first_row_label">
                             {{ criteria }}
-                        </div><!-- label_search_form -->
+                        </div><!-- search_item_group_first_row_label -->
 
                         <div class="search_item_group_second_row">
 
@@ -85,7 +85,7 @@
                     <div class=" search_item_group hundred_flex and_wrap">
                         <div class="label_search_form search_item_group_sub_min hundred_flex">
                             {{ criteria }}
-                        </div>
+                        </div><!-- label_search_form search_item_group_sub_min hundred_flex -->
 
                         {% if db_name == 'MAKE' %}
                         <div class="text_search_form ">
@@ -116,7 +116,7 @@
                                 form="form_investigations_search"> Exact
                             {% endif %}<!--if search_criteria_dictionary.get(criteria).1 == "exact"-->
                         </div>
-                    </div>
+                    </div><!-- search_item_group hundred_flex and_wrap -->
                     {% endif %}<!--if criteria in ('NHTSA Number', 'MAKE','MODEL'), elif criteria not in ('id') -->
                     {% endfor %}<!-- { for criteria in column_names } -->
 
@@ -173,7 +173,7 @@
                         <div class=" search_buttons_group_sub">
                             <input type="submit" class=" btn_width btn btn-primary" name="add_category"
                                 value="Add Category" form="form_investigations_search">
-                        </div><!-- add_cateogry_button -->
+                        </div><!-- search_buttons_group_sub -->
 
                         <div class="search_button search_buttons_group_sub">
                             <div class="btn_div">
@@ -192,7 +192,7 @@
                             </div>
 
                         </div><!-- search_button -->
-                    </div>
+                    </div><!-- search_buttons_group -->
 
                 </div>
 

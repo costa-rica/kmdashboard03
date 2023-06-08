@@ -173,7 +173,7 @@ def search_recalls():
             return redirect(url_for('bp_recalls.search_recalls', query_file_name=query_file_name,
                 no_hits_flag=no_hits_flag,limit_flag=limit_flag))
             
-    return render_template('search_recalls.html',table_data = recall_data_list, 
+    return render_template('main/search_recalls.html',table_data = recall_data_list, 
         column_names_dict=column_names_dict, column_names=column_names,
         len=len, make_list = make_list, query_file_name=query_file_name,
         search_criteria_dictionary=search_criteria_dictionary,str=str,
@@ -256,7 +256,7 @@ def recalls_dashboard():
         dash_re.MFGCAMPNO, dash_re.COMPNAME, dash_re.MFGNAME, dash_re_BGMAN,
         dash_re.ENDMAN, dash_re.RCLTYPECD, dash_re.POTAFF, dash_re_ODATE,
         dash_re.INFLUENCED_BY, dash_re.MFGTXT, dash_re_RCDATE, #RCDATE is dash_re_list[15]
-        dash_re_DATEA, dash_re.RPNO, dash_re.FMVSS, dash_re.DESC_DEFECT, dash_re.CONSEQUENCE_DEFCT,
+        dash_re_DATEA, dash_re.RPNO, dash_re.FMVSS, dash_re.DESC_DEFECT, dash_re.CONSEQUENCE_DEFECT,
         dash_re.CORRECTIVE_ACTION,dash_re.NOTES, dash_re.RCL_CMPT_ID,dash_re.km_notes,
         dash_re.date_updated.strftime('%Y/%m/%d %I:%M%p'), dash_re_files, dash_re_categories,
         dash_re_linked_records]
@@ -397,7 +397,7 @@ def recalls_dashboard():
         
         
         
-    return render_template('dashboard_re.html',re_entry_top_list=re_entry_top_list,
+    return render_template('main/dashboard_re.html',re_entry_top_list=re_entry_top_list,
         dash_re_list=dash_re_list, str=str, len=len, re_id_for_dash=re_id_for_dash,
         verified_by_list=verified_by_list,checkbox_verified=checkbox_verified, int=int, 
         category_list_dict=category_list_dict, list=list,

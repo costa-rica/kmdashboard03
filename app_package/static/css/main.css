@@ -12232,7 +12232,8 @@ textarea.form-control-lg {
 }
 .search_investigations_page .search_item_group {
   padding: 0.5rem 0rem;
-  align-items: center; /* Align items vertically in the middle */
+  align-items: center;
+  /* Align items vertically in the middle */
 }
 .search_investigations_page .search_item_group_first_row_label {
   width: 100%;
@@ -12242,7 +12243,8 @@ textarea.form-control-lg {
   width: 100%;
 }
 .search_investigations_page .text_search_form {
-  flex: 1 1 auto; /* Updated flex property */
+  flex: 1 1 auto;
+  /* Updated flex property */
 }
 .search_investigations_page .radio_div {
   font-size: small;
@@ -12256,7 +12258,8 @@ textarea.form-control-lg {
 .dashboard_investigations_page .investigation_entry_top {
   width: 100%;
 }
-.dashboard_investigations_page .inv_summary, .dashboard_investigations_page .inv_km_notes {
+.dashboard_investigations_page .inv_summary,
+.dashboard_investigations_page .inv_km_notes {
   width: 100%;
 }
 .dashboard_investigations_page .link_records_div_super {
@@ -12278,10 +12281,66 @@ textarea.form-control-lg {
   text-align: end;
 }
 
+/* Search Recalls Page */
+.search_recalls_page .rows_search_form {
+  width: 100%;
+}
+.search_recalls_page .search_item_group {
+  padding: 0.5rem 0rem;
+  align-items: center;
+  /* Align items vertically in the middle */
+}
+.search_recalls_page .search_item_group_first_row_label {
+  width: 100%;
+}
+.search_recalls_page .search_item_group_second_row {
+  display: flex;
+  width: 100%;
+}
+.search_recalls_page .text_search_form {
+  flex: 1 1 auto;
+  /* Updated flex property */
+}
+.search_recalls_page .radio_div {
+  font-size: small;
+}
+
+/* Dashboard Recalls */
+.dashboard_recalls_page .title_and_stuff {
+  padding-top: 2rem;
+  padding-bottom: 1rem;
+}
+.dashboard_recalls_page .investigation_entry_top {
+  width: 100%;
+}
+.dashboard_recalls_page .inv_summary,
+.dashboard_recalls_page .inv_km_notes {
+  width: 100%;
+}
+.dashboard_recalls_page .link_records_div_super {
+  padding: 0.5rem 0;
+}
+.dashboard_recalls_page .link_records_div {
+  padding: 1rem 0.5rem;
+  border: 1px solid var(--bs-gray-600);
+  border-width: 0.25em;
+  border-radius: 3rem;
+}
+.dashboard_recalls_page .link_record_btn_div {
+  text-align: end;
+}
+.dashboard_recalls_page .text_input_links {
+  padding: 1rem 0;
+}
+.dashboard_recalls_page .inv_update {
+  text-align: end;
+}
+
 @media screen and (min-width: 768px) {
   /* Search Investigaitons Page */
   .search_investigations_page .text_search_form {
-    flex: 1 1 auto; /* Updated flex property */
+    flex: 1 1 auto;
+    /* Updated flex property */
   }
   .search_investigations_page .search_item_group_second_row {
     flex-wrap: nowrap;
