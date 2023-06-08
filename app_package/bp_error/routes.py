@@ -5,6 +5,7 @@ import os
 import logging
 from logging.handlers import RotatingFileHandler
 import jinja2
+import werkzeug
 
 #Setting up Logger
 formatter = logging.Formatter('%(asctime)s:%(name)s:%(message)s')
@@ -68,34 +69,23 @@ def handle_500(err):
 
 
 if os.environ.get('CONFIG_TYPE')=='prod':
+
     @bp_error.app_errorhandler(AttributeError)
-    def error_attribute(AttributeError):
-        error_message = f"Could be anything... ¯\_(ツ)_/¯  ... try again or send email to {current_app.config['MAIL_USERNAME']}."
-        return render_template('error_template.html', error_number="Did you login?", error_message=error_message, 
-        error_message_2 = AttributeError)
-
     @bp_error.app_errorhandler(KeyError)
-    def error_key(KeyError):
-        error_message = f"Could be anything... ¯\_(ツ)_/¯  ... try again or send email to {current_app.config['MAIL_USERNAME']}."
-        return render_template('error_template.html', error_number="KeyError", error_message=error_message,
-        error_message_2 = KeyError)
-
     @bp_error.app_errorhandler(TypeError)
-    def error_key(TypeError):
-        error_message = f"Could be anything... ¯\_(ツ)_/¯  ... try again or send email to {current_app.config['MAIL_USERNAME']}."
-        return render_template('error_template.html', error_number="TypeError", error_message=error_message,
-        error_message_2 = TypeError)
-
     @bp_error.app_errorhandler(FileNotFoundError)
-    def error_key(FileNotFoundError):
+    @bp_error.app_errorhandler(ValueError)
+    # def error_key(FileNotFoundError):
+    def error_key(e):
         error_message = f"Could be anything... ¯\_(ツ)_/¯  ... try again or send email to {current_app.config['MAIL_USERNAME']}."
-        return render_template('error_template.html', error_number="FileNotFoundError", error_message=error_message,
-        error_message_2 = FileNotFoundError)
+        return render_template('error_template.html', error_number=e, error_message=error_message)
+
 
     @bp_error.app_errorhandler(jinja2.exceptions.TemplateNotFound)
     @bp_error.app_errorhandler(jinja2.exceptions.UndefinedError)
+    @bp_error.app_errorhandler(werkzeug.routing.exceptions.BuildError)
     def error_key(e):
         error_message = f"Could be anything... ¯\_(ツ)_/¯  ... try again or send email to {current_app.config['MAIL_USERNAME']}."
-        return render_template('error_template.html', error_number="", error_message=error_message,
+        return render_template('error_template.html', error_number=e, error_message=error_message,
         error_message_2 = e)
 

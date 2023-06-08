@@ -79,3 +79,7 @@ def test_undef():
     except NameError:
         raise jinja2.exceptions.UndefinedError("Variable is undefined")
 
+@bp_main.route("/test_error", methods=["GET","POST"])
+def test_error():
+    raise AttributeError("This is a custom AttributeError")
+
