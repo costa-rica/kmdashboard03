@@ -19,7 +19,7 @@
                     href="{{ url_for('bp_investigations.search_investigations', query_file_name='current_query_inv.txt') }}">Back
                     to query</a>
                 </div>
-            </div>
+            </div><!-- title_and_stuff -->
 
             <div class="std_framing">
 
@@ -62,32 +62,34 @@
 
                 <label class="inv_summary">
                     Summary:
-                    <textarea class="" name="inv_summary_textarea form-control" row=3 readonly
+                    <textarea class="form-control" name="inv_summary_textarea" row=3 readonly
                         form="form_investigations_dash">{{ dash_inv_list[10] }}</textarea>
                 </label>
                 {% if dash_inv_list[14] %}
                 <label class="inv_summary">
                     Assigned Categories:
-                    <textarea class="" name="inv_summary_textarea form-control" row=3 readonly
+                    <textarea class="form-control" name="inv_summary_textarea " row=3 readonly
                         form="form_investigations_dash">{{ str(dash_inv_list[14])[1:-1] }}</textarea>
                 </label>
                 {% endif %}
 
                 <label class="inv_km_notes">
                     KM Notes:
-                    <textarea class="" name="inv_km_notes form-control" rows=3
+                    <textarea class="form-control" name="inv_km_notes form-control" rows=3
                         form="form_investigations_dash">{{ dash_inv_list[11] }}</textarea>
                 </label>
 
 
 
+                <div class="link_records_div_super">
 
+                
                 <div class="link_records_div">
                     <div>
                         Link this investigation to another record:<br />
                         {{ inv_form.record_type }}<br />
 
-                        <div class="">
+                        <div class="text_input_links">
                             <input type="text" class="text_input_wide form-control" name="records_list"
                                 list="records_list3_list" form="form_investigations_dash">
                             <datalist id="records_list3_list">
@@ -96,9 +98,11 @@
                                 {% endfor %}
                             </datalist>
                         </div>
-
-                        <input type="submit" class="update_inv link_record_button" name="link_record"
+                        <div class="link_record_btn_div">
+                            <input type="submit" class="btn btn-secondary" name="link_record"
                             value="Link Record" form="form_investigations_dash">
+                        </div>
+
 
                     </div>
                     <br />
@@ -118,7 +122,8 @@
                         {% endfor %}
                     </div>
 
-                </div>
+                </div><!-- link_records_div -->
+            </div>
             </div>
 
 
@@ -143,7 +148,7 @@
 
                     <div class="file_input">
                         <input type="file" name="investigation_file" accept=".pdf, .doc, .docx" multiple
-                            form="form_investigations_dash">
+                            form="form_investigations_dash" class="btn">
                     </div>
                 </div>
 
@@ -153,7 +158,7 @@
                     {% if inv_id_for_dash =='no investigations found' %}
                     No record to update
                     {% else %}
-                    <input type="submit" class="update_inv" name="update_inv" value="Update">
+                    <input type="submit" class="btn btn-primary" name="update_inv" value="Update">
 
                     <div class="verify_box_and_label">
                         <input type="checkbox" class="unique_name_checkbox" name="verified_by_user"

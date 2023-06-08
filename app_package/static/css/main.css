@@ -12247,6 +12247,7 @@ textarea.form-control-lg {
 .search_investigations_page .radio_div {
   font-size: small;
 }
+
 /* Dashboard Investigations */
 .dashboard_investigations_page .dashboard {
   display: flex;
@@ -12254,9 +12255,31 @@ textarea.form-control-lg {
 }
 .dashboard_investigations_page .title_and_stuff {
   padding-top: 2rem;
+  padding-bottom: 1rem;
 }
 .dashboard_investigations_page .investigation_entry_top {
   width: 100%;
+}
+.dashboard_investigations_page .inv_summary, .dashboard_investigations_page .inv_km_notes {
+  width: 100%;
+}
+.dashboard_investigations_page .link_records_div_super {
+  padding: 0.5rem 0;
+}
+.dashboard_investigations_page .link_records_div {
+  padding: 1rem 0.5rem;
+  border: 1px solid var(--bs-gray-600);
+  border-width: 0.25em;
+  border-radius: 3rem;
+}
+.dashboard_investigations_page .link_record_btn_div {
+  text-align: end;
+}
+.dashboard_investigations_page .text_input_links {
+  padding: 1rem 0;
+}
+.dashboard_investigations_page .inv_update {
+  text-align: end;
 }
 
 @media screen and (min-width: 768px) {
