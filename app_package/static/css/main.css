@@ -12249,10 +12249,6 @@ textarea.form-control-lg {
 }
 
 /* Dashboard Investigations */
-.dashboard_investigations_page .dashboard {
-  display: flex;
-  flex-wrap: wrap;
-}
 .dashboard_investigations_page .title_and_stuff {
   padding-top: 2rem;
   padding-bottom: 1rem;
