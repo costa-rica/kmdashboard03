@@ -5,6 +5,7 @@ from flask_login import login_required, login_user, logout_user, current_user
 import os
 import logging
 from logging.handlers import RotatingFileHandler
+import jinja2
 
 
 bp_main = Blueprint('bp_main', __name__)
@@ -66,4 +67,15 @@ def temporarily_down():
 @bp_main.route("/test_404", methods=["GET","POST"])
 def test_404():
     raise FileNotFoundError("File not found") 
+
+@bp_main.route("/test_404_2", methods=["GET","POST"])
+def test_404_2():
+    abort(404) 
+
+@bp_main.route("/test_undef", methods=["GET","POST"])
+def test_undef():
+    try:
+        undefined_variable = some_undefined_variable
+    except NameError:
+        raise jinja2.exceptions.UndefinedError("Variable is undefined")
 

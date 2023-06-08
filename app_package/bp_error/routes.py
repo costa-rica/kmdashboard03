@@ -4,6 +4,7 @@ from flask import render_template, current_app, request
 import os
 import logging
 from logging.handlers import RotatingFileHandler
+import jinja2
 
 #Setting up Logger
 formatter = logging.Formatter('%(asctime)s:%(name)s:%(message)s')
@@ -62,31 +63,39 @@ def handle_500(err):
     logger_bp_error.info(f'@bp_error.app_errorhandler(500), err: {err}')
     logger_bp_error.info(f'- request.referrer: {request.referrer}')
     logger_bp_error.info(f'- request.url: {request.url}')
-    error_message = f"Could be anything... ¯\_(ツ)_/¯  ... try again or send email to {current_app.config['EMAIL_DASH_AND_DATA']}."
+    error_message = f"Could be anything... ¯\_(ツ)_/¯  ... try again or send email to {current_app.config['MAIL_USERNAME']}."
     return render_template('error_template.html', error_number="500", error_message=error_message)
 
 
 if os.environ.get('CONFIG_TYPE')=='prod':
     @bp_error.app_errorhandler(AttributeError)
     def error_attribute(AttributeError):
-        error_message = f"Could be anything... ¯\_(ツ)_/¯  ... try again or send email to {current_app.config['EMAIL_DASH_AND_DATA']}."
+        error_message = f"Could be anything... ¯\_(ツ)_/¯  ... try again or send email to {current_app.config['MAIL_USERNAME']}."
         return render_template('error_template.html', error_number="Did you login?", error_message=error_message, 
         error_message_2 = AttributeError)
 
     @bp_error.app_errorhandler(KeyError)
     def error_key(KeyError):
-        error_message = f"Could be anything... ¯\_(ツ)_/¯  ... try again or send email to {current_app.config['EMAIL_DASH_AND_DATA']}."
-        return render_template('error_template.html', error_number="Did you login?", error_message=error_message,
+        error_message = f"Could be anything... ¯\_(ツ)_/¯  ... try again or send email to {current_app.config['MAIL_USERNAME']}."
+        return render_template('error_template.html', error_number="KeyError", error_message=error_message,
         error_message_2 = KeyError)
 
     @bp_error.app_errorhandler(TypeError)
-    def error_key(KeyError):
-        error_message = f"Could be anything... ¯\_(ツ)_/¯  ... try again or send email to {current_app.config['EMAIL_DASH_AND_DATA']}."
-        return render_template('error_template.html', error_number="Did you login?", error_message=error_message,
+    def error_key(TypeError):
+        error_message = f"Could be anything... ¯\_(ツ)_/¯  ... try again or send email to {current_app.config['MAIL_USERNAME']}."
+        return render_template('error_template.html', error_number="TypeError", error_message=error_message,
         error_message_2 = TypeError)
 
     @bp_error.app_errorhandler(FileNotFoundError)
-    def error_key(KeyError):
-        error_message = f"Could be anything... ¯\_(ツ)_/¯  ... try again or send email to {current_app.config['EMAIL_DASH_AND_DATA']}."
-        return render_template('error_template.html', error_number="Did you login?", error_message=error_message,
-        error_message_2 = TypeError)
+    def error_key(FileNotFoundError):
+        error_message = f"Could be anything... ¯\_(ツ)_/¯  ... try again or send email to {current_app.config['MAIL_USERNAME']}."
+        return render_template('error_template.html', error_number="FileNotFoundError", error_message=error_message,
+        error_message_2 = FileNotFoundError)
+
+    @bp_error.app_errorhandler(jinja2.exceptions.TemplateNotFound)
+    @bp_error.app_errorhandler(jinja2.exceptions.UndefinedError)
+    def error_key(e):
+        error_message = f"Could be anything... ¯\_(ツ)_/¯  ... try again or send email to {current_app.config['MAIL_USERNAME']}."
+        return render_template('error_template.html', error_number="", error_message=error_message,
+        error_message_2 = e)
+
