@@ -67,6 +67,14 @@ def handle_500(err):
     error_message = f"Could be anything... ¯\_(ツ)_/¯  ... try again or send email to {current_app.config['MAIL_USERNAME']}."
     return render_template('error_template.html', error_number="500", error_message=error_message)
 
+@bp_error.app_errorhandler(502)
+def handle_500(err):
+    logger_bp_error.info(f'@bp_error.app_errorhandler(502), err: {err}')
+    logger_bp_error.info(f'- request.referrer: {request.referrer}')
+    logger_bp_error.info(f'- request.url: {request.url}')
+    error_message = f"Could be anything... ¯\_(ツ)_/¯  ... try again or send email to {current_app.config['MAIL_USERNAME']}."
+    return render_template('error_template.html', error_number="500", error_message=error_message)
+
 
 # if os.environ.get('CONFIG_TYPE')=='prod':
 
