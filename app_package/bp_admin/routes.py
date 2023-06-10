@@ -8,15 +8,16 @@ import logging
 from logging.handlers import RotatingFileHandler
 import os
 import json
-from km03_models import sess, engine, text, Base, \
-    Users
+from km03_models import sess, engine, text, Base, Users, Investigations, Tracking_inv, \
+    Saved_queries_inv, Recalls, Tracking_re, Saved_queries_re
 from app_package.bp_users.utils import send_reset_email, send_confirm_email, \
     userPermission
 from app_package.bp_admin.utils import formatExcelHeader, \
-    load_database_util, fix_recalls_wb_util
+    load_database_util, fix_recalls_wb_util, fix_investigations_wb_util
 import pandas as pd
 import shutil
 from datetime import datetime
+import openpyxl
 
 
 import zipfile
@@ -62,66 +63,28 @@ def before_request():
 
 @bp_admin.route('/admin_page', methods = ['GET', 'POST'])
 @login_required
-def admin_page():
-    logger_bp_admin.info('- in bp_admin_db -')
-    logger_bp_admin.info(f"current_user.admin: {current_user.admin}")
-
-    if not current_user.admin:
-        return redirect(url_for('bp_main.rincons'))
+def admin():
+    users_list=[i.email for i in sess.query(Users).all()]
     
-    rincon_users = sess.query(Users).all()
-
-    col_names = ["username"]
-
-    if request.method == "POST":
+    with open(os.path.join(current_app.config['DIR_DB_FILES_UTILITY'],'added_users.txt')) as json_file:
+        get_users_dict=json.load(json_file)
+        json_file.close()
+    # get_users_list=list(get_users.keys())
+    if request.method == 'POST':
         formDict = request.form.to_dict()
-        # print("formDict: ", formDict)
-        if formDict.get("update_user_privileges"):
-            del formDict['update_user_privileges']
-            update_list = []
-            for user_rincon, permission_bool_str in formDict.items():
-                underscore_user, underscore_rincon = user_rincon.split(",")
-                _,user_id = underscore_user.split("_")
-                _,rincon_id = underscore_rincon.split("_")
-                user_rincon_assoc = sess.query(UsersToRincons).filter_by(users_table_id=user_id, rincons_table_id=rincon_id).first()
-                permission_bool = False if permission_bool_str == "false" else True
-                if user_rincon_assoc.permission_admin != permission_bool:
-                    # print("* user_rincon_assoc.permission_admin != permission_bool *")
-                    # print("user_rincon_assoc: ", user_rincon_assoc)
-                    # print("user_rincon_assoc, ricon_admin_permission: ", type(user_rincon_assoc.permission_admin), user_rincon_assoc.permission_admin)
-                    # print("formDict permission_bool_str: ", type(permission_bool_str), permission_bool_str)
-                    user_rincon_assoc.permission_admin = permission_bool
-                    sess.commit()
-
-                    user_updated = sess.get(Users, user_id)
-                    rincon_updated = sess.get(Rincons, rincon_id)
-
-                    if permission_bool:
-                        update_list.append(f"Successfully updated {user_updated.username} to admin ({permission_bool}) for  {rincon_updated.name}")
-                    else:
-                        update_list.append(f"{user_updated.username} is no longer an admin ({permission_bool}) for  {rincon_updated.name}")
-
-
-                    
-
-
-                    # if permission_bool:
-                    #     flash(f"Successfully updated {user_updated.username} to admin ({permission_bool}) for  {rincon_updated.name}", "success")
-                    #     return redirect(request.url)
-                    
-                    # flash(f"{user_updated.username} is no longer an admin ({permission_bool}) for  {rincon_updated.name}", "warning")
-            if len(update_list) > 0 :
-                for count, i in enumerate(update_list):
-                    if count == 0:
-                        flash_update_string = i
-                    else:
-                        flash_update_string = f"{flash_update_string},\n{i}"
-                flash(flash_update_string, "success")
-            return redirect(request.url)
-
-
-
-    return render_template('admin/admin.html', rincon_users=rincon_users, col_names=col_names)
+        print('formDict:::', formDict)
+        if formDict.get('add_privilege'):
+            
+            get_users_dict[formDict.get('add_user')]='add privilege'
+        else:
+            get_users_dict[formDict.get('add_user')]='no add privileges'
+        
+        added_users_file=os.path.join(current_app.config['DIR_DB_FILES_UTILITY'], 'added_users.txt')
+        with open(added_users_file, 'w') as json_file:
+            json.dump(get_users_dict, json_file)
+        
+        return redirect(url_for('users.admin'))
+    return render_template('admin/admin.html', users_list=get_users_dict)
 
 
 
@@ -133,21 +96,23 @@ def database_page():
     legend='Database downloads'
     if request.method == 'POST':
         formDict = request.form.to_dict()
+        print('formDict::::', formDict)
+
         if formDict.get('build_workbook')=="True":
             
-            #check if os.listdir(current_app.config['FILES_DATABASE']), if no create:
-            if not os.path.exists(current_app.config['FILES_DATABASE']):
+            #check if os.listdir(current_app.config['DIR_DB_FILES_DATABASE']), if no create:
+            if not os.path.exists(current_app.config['DIR_DB_FILES_DATABASE']):
                 # print('There is not database folder found???')
-                os.mkdir(current_app.config['FILES_DATABASE'])
+                os.mkdir(current_app.config['DIR_DB_FILES_DATABASE'])
             
-            for file in os.listdir(current_app.config['FILES_DATABASE']):
-                os.remove(os.path.join(current_app.config['FILES_DATABASE'], file))
+            for file in os.listdir(current_app.config['DIR_DB_FILES_DATABASE']):
+                os.remove(os.path.join(current_app.config['DIR_DB_FILES_DATABASE'], file))
 
             
             timeStamp = datetime.now().strftime("%y%m%d_%H%M%S")
             workbook_name=f"database_tables{timeStamp}.xlsx"
             print('reportName:::', workbook_name)
-            excelObj=pd.ExcelWriter(os.path.join(current_app.config['FILES_DATABASE'], workbook_name),
+            excelObj=pd.ExcelWriter(os.path.join(current_app.config['DIR_DB_FILES_DATABASE'], workbook_name),
                 date_format='yyyy/mm/dd', datetime_format='yyyy/mm/dd')
             workbook=excelObj.book
             
@@ -166,28 +131,31 @@ def database_page():
                     # dmrDateFormat = workbook.add_format({'num_format': 'yyyy-mm-dd'})
                     # worksheet.set_column(1,1, 15, dmrDateFormat)
                 
-            print('path of reports:::',os.path.join(current_app.config['FILES_DATABASE'],str(workbook_name)))
+            print('path of reports:::',os.path.join(current_app.config['DIR_DB_FILES_DATABASE'],str(workbook_name)))
             excelObj.close()
             print('excel object close')
-            # return send_from_directory(current_app.config['FILES_DATABASE'],workbook_name, as_attachment=True)
+            # return send_from_directory(current_app.config['DIR_DB_FILES_DATABASE'],workbook_name, as_attachment=True)
             return redirect(url_for('users.database_page'))
+
         elif formDict.get('download_db_workbook'):
             return redirect(url_for('users.download_db_workbook'))
+
         elif formDict.get('uploadFileButton'):
-            print('****uploadFileButton****')
+            # print('****uploadFileButton****')
+            logger_bp_admin.info("* upload excel file to ")
             formDict = request.form.to_dict()
             filesDict = request.files.to_dict()
-            print('formDict:::',formDict)
-            print('filesDict:::', filesDict)
+            # print('formDict:::',formDict)
+            # print('filesDict:::', filesDict)
             
             
-            if not os.path.exists(current_app.config['UPLOADED_TEMP_DATA']):
-                os.mkdir(current_app.config['UPLOADED_TEMP_DATA'])
+            if not os.path.exists(current_app.config['DIR_DB_FILES_TEMPORARY']):
+                os.mkdir(current_app.config['DIR_DB_FILES_TEMPORARY'])
             
             file_type=formDict.get('file_type')
             uploadData=request.files['fileUpload']
             uploadFileName=uploadData.filename
-            uploadData.save(os.path.join(current_app.config['UPLOADED_TEMP_DATA'], uploadFileName))
+            uploadData.save(os.path.join(current_app.config['DIR_DB_FILES_TEMPORARY'], uploadFileName))
             if file_type=="excel":
                 wb = openpyxl.load_workbook(uploadData)
                 sheetNames=json.dumps(wb.sheetnames)
@@ -198,13 +166,41 @@ def database_page():
             return redirect(url_for('bp_admin.database_upload',legend=legend,uploadFileName=uploadFileName,
                 file_type=file_type))
             # return redirect(url_for('users.database_page'))
+        elif formDict.get('btn_database_delete') and formDict.get('database_delete_verify') == 'delete':
+            logger_bp_admin.info("* Delete database")
+
+            
+            sess.query(Investigations).delete()
+            sess.query(Tracking_inv).delete()
+            sess.query(Saved_queries_inv).delete()
+            sess.query(Recalls).delete()
+            sess.query(Tracking_re).delete()
+            sess.query(Saved_queries_re).delete()
+            sess.commit()
+
+            logger_bp_admin.info(f"- database (except users table) deleted by: {current_user.email}")
+            flash("Data tables (except for users table) successfully deleted", "warning")
+            return redirect(request.url)
+
     return render_template('admin/database_page.html', legend=legend, tableNamesList=tableNamesList)
 
+
+
+@bp_admin.route("/download_db_workbook", methods=["GET","POST"])
+@login_required
+def download_db_workbook():
+    # workbook_name=request.args.get('workbook_name')
+    workbook_name = os.listdir(current_app.config['DIR_DB_FILES_DATABASE'])[0]
+    print('file:::', os.path.join(current_app.root_path, 'static','files_database'),workbook_name)
+    file_path = r'D:\OneDrive\Documents\professional\20210610kmDashboard2.0\fileShareApp\static\files_database\\'
+    
+    return send_from_directory(os.path.join(current_app.config['DIR_DB_FILES_DATABASE']),workbook_name, as_attachment=True)
 
 
 @bp_admin.route('/database_upload', methods=["GET","POST"])
 @login_required
 def database_upload():
+    logger_bp_admin.info("- in database_upload route")
     file_type=request.args.get('file_type')
     if file_type=='excel':
         tableNamesList=json.loads(request.args['tableNamesList'])
@@ -214,21 +210,22 @@ def database_upload():
     # uploadFlag=True
     limit_upload_flag='checked'
     
-    
-    
     if request.method == 'POST':
         
         formDict = request.form.to_dict()
-        print('formDict::::', formDict)
+        # print('formDict::::', formDict)
         if formDict.get('appendExcel'):
             
-            uploaded_file=os.path.join(current_app.config['UPLOADED_TEMP_DATA'], uploadFileName)
-            print('uploaded_file::::',uploaded_file)
+            uploaded_file=os.path.join(current_app.config['DIR_DB_FILES_TEMPORARY'], uploadFileName)
+            # print('uploaded_file::::',uploaded_file)
             if file_type=='excel':
+                logger_bp_admin.info("- in file_type=='excel'")
+                sheet_upload_status = []
                 for sheet in sheetNames:
+                    logger_bp_admin.info(f"- in sheet: {sheet}")
                     sheetUpload=pd.read_excel(uploaded_file,engine='openpyxl',sheet_name=sheet)
                     if sheet=='user':
-                        existing_emails=[i[0] for i in db.session.query(User.email).all()]
+                        existing_emails=[i[0] for i in sess.query(Users.email).all()]
                         sheetUpload=pd.read_excel(uploaded_file,engine='openpyxl',sheet_name='user')
                         sheetUpload=sheetUpload[~sheetUpload['email'].isin(existing_emails)]
 
@@ -236,38 +233,61 @@ def database_upload():
                         sheetUpload['date_updated']=datetime.now()
                         if formDict.get(sheet) =='recalls':
                             sheetUpload=fix_recalls_wb_util(sheetUpload,uploadFileName)
-                    try:
-                        sheetUpload.to_sql(formDict.get(sheet),con=db.engine, if_exists='append', index=False)
-                        print('upload SUCCESS!: ', sheet)
-                    except IndexError:
-                        pass
-                    except:
-                        os.remove(os.path.join(current_app.config['UPLOADED_TEMP_DATA'], uploadFileName))
+                        elif formDict.get(sheet) =='investigations':
+                            sheetUpload=fix_investigations_wb_util(sheetUpload)
 
-                        flash(f"""Problem uploading {sheet} table. Check for 1)uniquness with id or RECORD_ID 2)date columns
-                            are in a date format in excel.""", 'warning')
+                    try:
+                        if sheet == 'user':
+                            sheetUpload.to_sql('users',con=engine, if_exists='append', index=False)
+                        elif sheet == 'recalls':
+                            sheetUpload["CONSEQUENCE_DEFECT"] = sheetUpload["CONSEQUENCE_DEFCT"]
+                            sheetUpload.drop(['CONSEQUENCE_DEFCT'], axis=1, inplace = True)
+                            sheetUpload.to_sql(formDict.get(sheet),con=engine, if_exists='append', index=False)
+                        else:
+                            sheetUpload.to_sql(formDict.get(sheet),con=engine, if_exists='append', index=False)
                     
+                        # df_update.to_sql(table_name, con=engine, if_exists='append', index=False)
+                        # print('upload SUCCESS!: ', sheet)
+                        logger_bp_admin.info(f"upload SUCCESS!:: {sheet}")
+                        sheet_upload_status.append(f"{sheet}: success")
+                    except IndexError:
+                        logger_bp_admin.info(f"except IndexError:: {IndexError}")
+                        # return redirect(url_for('bp_admin.database_page',legend=legend,
+                        #     tableNamesList=tableNamesList, sheetNames=sheetNames))
+                        sheet_upload_status.append(f"{sheet}: fail")
+                    except:
+                        logger_bp_admin.info(f"except another error:: {sheet}")
+                        # os.remove(os.path.join(current_app.config['DIR_DB_FILES_TEMPORARY'], uploadFileName))
+                        sheet_upload_status.append(f"{sheet}: fail")
+
+                        # flash(f"""Problem uploading {sheet} table. Check for 1)uniquness with id or RECORD_ID 2)date columns
+                        #     are in a date format in excel.""", 'warning')
+                        # return redirect(url_for('bp_admin.database_page',legend=legend,
+                        #     tableNamesList=tableNamesList, sheetNames=sheetNames))
                     #clear files_temp folder
-                    for file in os.listdir(current_app.config['UPLOADED_TEMP_DATA']):
-                        os.remove(os.path.join(current_app.config['UPLOADED_TEMP_DATA'], file))
-                    flash(f'Table successfully uploaded to database!', 'success')
-                    return redirect(url_for('bp_admin.database_page',legend=legend,
-                        tableNamesList=tableNamesList, sheetNames=sheetNames))
+                for file in os.listdir(current_app.config['DIR_DB_FILES_TEMPORARY']):
+                    os.remove(os.path.join(current_app.config['DIR_DB_FILES_TEMPORARY'], file))
+                status_message =""
+                for sheet_message in sheet_upload_status:
+                    status_message = status_message +sheet_message + ",\n"
+                flash(f'Table sheet status: {status_message}', 'info')
+                return redirect(url_for('bp_admin.database_page',legend=legend,
+                    tableNamesList=tableNamesList, sheetNames=sheetNames))
 
                 
             elif file_type=='text':
-                zipfile.ZipFile(uploaded_file).extractall(path=current_app.config['UPLOADED_TEMP_DATA'])
+                zipfile.ZipFile(uploaded_file).extractall(path=current_app.config['DIR_DB_FILES_TEMPORARY'])
                 
                 
-                text_file_name=[x for x in os.listdir(current_app.config['UPLOADED_TEMP_DATA']) if x[-4:]=='.txt'][0]
+                text_file_name=[x for x in os.listdir(current_app.config['DIR_DB_FILES_TEMPORARY']) if x[-4:]=='.txt'][0]
                 limit_upload_flag=formDict.get('limit_upload_flag')
                 
                 flash_message=load_database_util(text_file_name, limit_upload_flag)
                 
                 
                 
-                for file in os.listdir(current_app.config['UPLOADED_TEMP_DATA']):
-                    os.remove(os.path.join(current_app.config['UPLOADED_TEMP_DATA'], file))
+                for file in os.listdir(current_app.config['DIR_DB_FILES_TEMPORARY']):
+                    os.remove(os.path.join(current_app.config['DIR_DB_FILES_TEMPORARY'], file))
 
                     
                 flash(flash_message[0], flash_message[1])
@@ -287,6 +307,35 @@ def database_upload():
                     file_type=file_type,limit_upload_flag=limit_upload_flag)
 
 
+@bp_admin.route("/delete_user/<email>", methods=["GET","POST"])
+@login_required
+def delete_user(email):
+    print('did we get here????', email)
+    with open(os.path.join(current_app.config['DIR_DB_FILES_UTILITY'],'added_users.txt')) as json_file:
+        get_users_dict=json.load(json_file)
+        json_file.close()
+    
+    del get_users_dict[email]
+    
+    added_users_file=os.path.join(current_app.config['DIR_DB_FILES_UTILITY'], 'added_users.txt')
+    with open(added_users_file, 'w') as json_file:
+        json.dump(get_users_dict, json_file)
+        
+    if len(sess.query(User).filter_by(email=email).all())>0:
+        sess.query(User).filter_by(email=email).delete()
+        sess.commit()
+    
+    
+    
+    flash(f'{email} has been deleted!', 'success')
+    return redirect(url_for('users.admin'))
+
+
+# @bp_admin.route('/database_delete_data', methods=["GET","POST"])
+# @login_required
+# def database_delete_data():
+
+#     return redirect(request.referrer)
 
 
 
@@ -538,4 +587,9 @@ def database_upload():
 #         sess.commit()
 #         flash("nrodrig1@gmail updated to admin", "success")
 #     return redirect(url_for('bp_main.home'))
+
+
+
+
+
 

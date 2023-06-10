@@ -65,10 +65,10 @@ def load_database_util(text_file_name, limit_upload_flag):
             'MFR_NAME','ODATE','CDATE','CAMPNO','SUBJECT',
           'SUMMARY']
         if limit_upload_flag:
-            df_inv=pd.read_csv(os.path.join(current_app.config['UPLOADED_TEMP_DATA'], text_file_name),
+            df_inv=pd.read_csv(os.path.join(current_app.config['DIR_DB_FILES_TEMPORARY'], text_file_name),
                 sep='\t', lineterminator='\r', names=col_names,header=None,nrows=1000)
         else:
-            df_inv=pd.read_csv(os.path.join(current_app.config['UPLOADED_TEMP_DATA'], text_file_name),
+            df_inv=pd.read_csv(os.path.join(current_app.config['DIR_DB_FILES_TEMPORARY'], text_file_name),
                 sep='\t', lineterminator='\r', names=col_names,header=None)
         
         # This converts all column objects to dates then back to string. Note: sqlalchemy will convert back to date
@@ -96,15 +96,15 @@ def load_database_util(text_file_name, limit_upload_flag):
             'ODATE', 'INFLUENCED_BY', 'MFGTXT', 'RCDATE', 'DATEA', 'RPNO', 'FMVSS',
             'DESC_DEFECT', 'CONSEQUENCE_DEFCT', 'CORRECTIVE_ACTION','NOTES',
             'RCL_CMPT_ID','MFR_COMP_NAME','MFR_COMP_DESC','MFR_COMP_PTNO']
-        # df_re=pd.read_csv(os.path.join(current_app.config['UPLOADED_TEMP_DATA'], text_file_name),
+        # df_re=pd.read_csv(os.path.join(current_app.config['DIR_DB_FILES_TEMPORARY'], text_file_name),
             # sep='\t', lineterminator='\r', names=col_names,header=None)
 
         # NOTE: Old prior to kmdashboard03 (Jun 2023)
         # if limit_upload_flag:
-        #     df_re=pd.read_csv(os.path.join(current_app.config['UPLOADED_TEMP_DATA'], text_file_name),
+        #     df_re=pd.read_csv(os.path.join(current_app.config['DIR_DB_FILES_TEMPORARY'], text_file_name),
         #         names=col_names,header=None, sep='\t',nrows=1000)
         # else:
-        #     df_re=pd.read_csv(os.path.join(current_app.config['UPLOADED_TEMP_DATA'], text_file_name),
+        #     df_re=pd.read_csv(os.path.join(current_app.config['DIR_DB_FILES_TEMPORARY'], text_file_name),
         #         names=col_names,header=None, sep='\t')
 
         df_re = read_FLAT_RCL_to_df(text_file_name, limit_upload_flag)
@@ -163,11 +163,11 @@ def fix_recalls_wb_util(df_re,text_file_name):
         df_re['ODATE']=df_re['ODATE'][:9]
         df_re['RCDATE']=df_re['RCDATE'][:9]
         df_re['DATEA']=df_re['DATEA'][:9]
-        df_re['BGMAN']=pd.to_datetime(df_re['BGMAN'],format='%Y/%m/%d')
-        df_re['ENDMAN']=pd.to_datetime(df_re['ENDMAN'],format='%Y/%m/%d')
-        df_re['ODATE']=pd.to_datetime(df_re['ODATE'],format='%Y/%m/%d')
-        df_re['RCDATE']=pd.to_datetime(df_re['RCDATE'],format='%Y/%m/%d')
-        df_re['DATEA']=pd.to_datetime(df_re['DATEA'],format='%Y/%m/%d')
+        df_re['BGMAN']=pd.to_datetime(df_re['BGMAN'],format='%Y/%m/%d').dt.strftime('%Y-%m-%d')
+        df_re['ENDMAN']=pd.to_datetime(df_re['ENDMAN'],format='%Y/%m/%d').dt.strftime('%Y-%m-%d')
+        df_re['ODATE']=pd.to_datetime(df_re['ODATE'],format='%Y/%m/%d').dt.strftime('%Y-%m-%d')
+        df_re['RCDATE']=pd.to_datetime(df_re['RCDATE'],format='%Y/%m/%d').dt.strftime('%Y-%m-%d')
+        df_re['DATEA']=pd.to_datetime(df_re['DATEA'],format='%Y/%m/%d').dt.strftime('%Y-%m-%d')
         df_re['km_notes']=''
         df_re['date_updated']=pd.to_datetime(datetime.now())
         df_re['files']=''
@@ -177,7 +177,11 @@ def fix_recalls_wb_util(df_re,text_file_name):
         df_re['source_file_notes']=''
         return df_re
 
-
+def fix_investigations_wb_util(df_inv):
+    # Stringify dates - this will avoid importing 000' for time
+    df_inv['ODATE']=df_inv['ODATE'].dt.strftime('%Y-%m-%d')
+    df_inv['CDATE']=df_inv['CDATE'].dt.strftime('%Y-%m-%d')
+    return df_inv
 
 def read_FLAT_RCL_to_df(text_file_name, limit_upload_flag):
     logger_bp_admin.info(f"- in read_FLAT_RCL_to_df ")
@@ -188,7 +192,7 @@ def read_FLAT_RCL_to_df(text_file_name, limit_upload_flag):
     else:
         last_row = 1 * 10**7
     # Open the file in read mode
-    with open(os.path.join(current_app.config['UPLOADED_TEMP_DATA'], text_file_name), 'r') as file:
+    with open(os.path.join(current_app.config['DIR_DB_FILES_TEMPORARY'], text_file_name), 'r') as file:
         # Create a CSV reader object
         reader = csv.reader(file, delimiter='\t')
         
@@ -213,7 +217,8 @@ def read_FLAT_RCL_to_df(text_file_name, limit_upload_flag):
                 endman = datetime.strptime(line[9], "%Y%m%d") if "date" in line[9].lower() else line[9]
                 rcltypecd = line[10]
     #             potaff = int(line[11])
-                potaff = line[11]
+                # potaff = float(line[11])
+                potaff = None if line[11] =="" else line[11]
                 odate = datetime.strptime(line[12], "%Y%m%d") if "date" in line[12].lower() else line[12]
                 influenced_by = line[13]
                 mfgtxt = line[14]

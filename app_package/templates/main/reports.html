@@ -1,0 +1,197 @@
+{% extends "_layout.html" %}
+{% block title %} Reports {% endblock %}
+{% block main %}
+
+
+
+<div class="space_for_navbar_and_footer ">
+<div class="reports">
+    <div class="container">
+        <div class="reports_label">
+            <h4>Reports</h4><br/>
+        </div>
+
+        <div class="select_page">
+        <form method="POST" action="" enctype="multipart/form-data">
+            <div class='download_group'>
+                
+                <h5>Investigations Spreadsheet Report</h5>
+                <div class='download_group_inputs'>
+                    Steps to get file:
+                    <ol>
+                        <li><!--modal button-->
+                            <button type="button"  data-bs-toggle="modal" data-bs-target="#modalChooseColumnsInv">
+                                Select Columns for Report
+                            </button>
+                        </li>
+                        <li>
+                            <input type="submit" name="build_excel_report_inv" value="Build Excel Report"/>
+                            <div class="timestamp_group">
+                                Availible file time stamp: <input type="text" class="timestamp_input"  value="{{ time_stamp_inv }}" readonly>
+                            </div>
+                        </li>
+                        <li><a href="{{ url_for('bp_investigations.categories_report_download', excel_file_name=excel_file_name_inv) }}">Download</a> </li>
+                    </ol>
+                </div>
+            </div>
+            
+
+            <div class='download_group'>
+                
+                <h5>Recalls Spreadsheet Report</h5>
+                <div class='download_group_inputs'>
+                    Steps to get file:
+                    <ol>
+                        <li><!--modal button-->
+                            <button type="button"  data-bs-toggle="modal" data-bs-target="#modalChooseColumnsRe">
+                                Select Columns for Report
+                            </button>
+                        </li>
+                        <li>
+                            <input type="submit" name="build_excel_report_re" value="Build Excel Report"/>
+                            <div class="timestamp_group">
+                                Availible file time stamp: <input type="text" class="timestamp_input"  value="{{ time_stamp_re }}" readonly>
+                            </div>
+                        </li>
+                        <li><a href="{{ url_for('bp_investigations.categories_report_download', excel_file_name=excel_file_name_re) }}">Download</a> </li>
+                    </ol>
+                </div>
+            </div>
+
+
+
+
+            <div class='download_group'>
+                <h5>Attched Files for Investigations and Recalls</h5>
+                <a href="{{ url_for('bp_main.files_zip') }}">Download Compressed File</a> <br/>
+                <i>Zip file of all Investigation and Recall reports seperated into folders. 
+                    Investigations folder names are 'Investigation_' + NHTSA_ACTION_NUMBER + Investigation ID.
+                    Recalls folder names are 'Recall_' + Record ID.</i>
+            </div>
+
+
+
+            <!-- Investigations Modal -->
+            <div class="modal fade" id="modalChooseColumnsInv" tabindex="-1" aria-labelledby="modalChooseColumnsInvLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                    <h5 class="modal-title" id="modalChooseColumnsInvLabel"> Select the columns to include in Excel Report</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+
+                        <div class="modal_categories_checkboxes">
+                            {% for i in column_names_inv %}
+                            <div class="modal_checkbox_group">
+                                {% if i in categories_dict_inv.keys() %}
+                                    <input type="checkbox"  name="{{ i }}" id="{{ 'checkbox_' + i }}" value="Yes" checked/>
+                                    <label for="{{ 'checkbox_' + i  }}">{{ i }}</label>
+                                {% else %}
+                                <input type="checkbox"  name="{{ i }}" id="{{ 'checkbox_' + i }}" value="Yes" />
+                                <label for="{{ 'checkbox_' + i  }}">{{ i }}</label>
+                                {% endif %}
+                            </div>
+                            {% endfor %}
+                        </div>
+
+                    </div>
+                    <div class="modal-footer modal-footer_additional">
+                        <span class="span_1" >*Pre-selected categories are from existing report</span>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <!--<button type="button" class="btn btn-primary">Save Categories</button>-->
+                        <button type="button" class="btn btn-primary" id="checkAllBtnInv">Check All</button>
+                    </div>
+                </div>
+                </div>
+            </div>
+
+
+            <!-- Recalls Modal -->
+            <div class="modal fade" id="modalChooseColumnsRe" tabindex="-1" aria-labelledby="modalChooseColumnsReLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                    <h5 class="modal-title" id="modalChooseColumnsReLabel"> Select the columns to include in Excel Report</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+
+                        <div class="modal_categories_checkboxes">
+                            {% for i in column_names_re %}
+                            <div class="modal_checkbox_group">
+                                {% if i in categories_dict_re.keys() %}
+                                    <input type="checkbox"  name="{{ i }}" id="{{ 'checkbox_' + i }}" value="Yes" checked/>
+                                    <label for="{{ 'checkbox_' + i  }}">{{ i }}</label>
+                                {% else %}
+                                <input type="checkbox"  name="{{ i }}" id="{{ 'checkbox_' + i }}" value="Yes" />
+                                <label for="{{ 'checkbox_' + i  }}">{{ i }}</label>
+                                {% endif %}
+                            </div>
+                            {% endfor %}
+                        </div>
+
+                    </div>
+                    <div class="modal-footer modal-footer_additional">
+                        <span class="span_1" >*Pre-selected categories are from existing report</span>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-primary" id="checkAllBtnRe">Check All</button>
+                        <!--<button type="button" class="btn btn-primary">Save Categories</button>-->
+                    </div>
+                </div>
+                </div>
+            </div>
+
+
+
+
+        </form>
+        </div>
+    </div>
+</div>
+</div><!-- space_for_navbar_and_footer -->
+
+
+<script>
+    $(document).ready(function() {
+      // Function to toggle the label and check/uncheck all checkboxes in INVESTIGATIONS modal (modalChooseColumnsInv)
+      $("#checkAllBtnInv").click(function() {
+        var check = $(this).data("check");
+        var checkboxes = $('#modalChooseColumnsInv input[type="checkbox"]');
+        if (check) {
+          checkboxes.prop('checked', true);
+          $(this).text("Uncheck All");
+        } else {
+          checkboxes.prop('checked', false);
+          $(this).text("Check All");
+        }
+        $(this).data("check", !check);
+      });
+  
+      // Function to toggle the label and check/uncheck all checkboxes in RECALLS modal (modalChooseColumnsRe)
+      $("#checkAllBtnRe").click(function() {
+        var check = $(this).data("check");
+        var checkboxes = $('#modalChooseColumnsRe input[type="checkbox"]');
+        if (check) {
+          checkboxes.prop('checked', true);
+          $(this).text("Uncheck All");
+        } else {
+          checkboxes.prop('checked', false);
+          $(this).text("Check All");
+        }
+        $(this).data("check", !check);
+      });
+  
+      // Trigger the click event on check all button when modal is shown
+      $("#modalChooseColumnsInv").on("shown.bs.modal", function() {
+        $("#checkAllBtnInv").trigger("click");
+      });
+  
+      $("#modalChooseColumnsRe").on("shown.bs.modal", function() {
+        $("#checkAllBtnRe").trigger("click");
+      });
+    });
+  </script>
+
+
+{% endblock %}

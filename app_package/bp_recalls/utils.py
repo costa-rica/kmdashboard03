@@ -47,7 +47,7 @@ def queryToDict(query_data, column_names):
 
 def recalls_query_util(query_file_name):
     recalls = sess.query(Recalls)
-    with open(os.path.join(current_app.config['QUERIES_FOLDER'],query_file_name)) as json_file:
+    with open(os.path.join(current_app.config['DIR_DB_QUERIES'],query_file_name)) as json_file:
         search_criteria_dict=json.load(json_file)
         json_file.close()
 
@@ -213,7 +213,7 @@ def update_recall(formDict, re_id_for_dash, verified_by_list):
 # def create_categories_xlsx(excel_file_name):
     # print('START create_categories_xlsx')
     # excelObj=pd.ExcelWriter(os.path.join(
-        # current_app.config['UTILITY_FILES_FOLDER'],excel_file_name))
+        # current_app.config['DIR_DB_FILES_UTILITY'],excel_file_name))
 
     # columnNames=Investigations.__table__.columns.keys()
     # colNamesDf=pd.DataFrame([columnNames],columns=columnNames)

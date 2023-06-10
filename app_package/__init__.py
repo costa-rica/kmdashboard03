@@ -43,6 +43,7 @@ TEMPORARILY_DOWN = "ACTIVE" if os.environ.get('TEMPORARILY_DOWN') == "1" else "i
 logger_init.info(f"- TEMPORARILY_DOWN: {TEMPORARILY_DOWN}")
 logger_init.info(f"- SQL_URI: sqlite:///{os.environ.get('DB_ROOT')}{os.environ.get('DB_NAME')}")
 
+
 mail = Mail()
 
 def create_app(config_for_flask = config):

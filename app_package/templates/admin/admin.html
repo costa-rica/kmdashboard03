@@ -1,112 +1,48 @@
 {% extends "_layout.html" %}
+
+
 {% block main %}
 
-<form method="POST" id="form_download_db" enctype=multipart/form-data></form>
-<form method="POST" id="form_rincon_user_admin" enctype=multipart/form-data></form>
+<div class="admin_page" >
+    <div class="container">
+
+        <form method="POST" action="" enctype="multipart/form-data">
+
+            <div>
+                <h2>Users</h2>
+                {% for i,j in users_list.items() %}
+                <ul class="ul_no_bullets">
+                    {% if j=='add privilege' %}
+                    <li >{{ i +'(' + j +')'}}</li>
+
+                    {% else %}
+                    <li >{{ i }} <a class="remove-image"  href="{{ url_for('bp_admin.delete_user', email=i) }}" 
+                        style="display: inline;">&#215;</a></li>
+
+                    {% endif %}
+                </ul>
+                {% endfor %}
+            </div>
 
 
+            <br/>
+            <div>
+                Add user: <input type="text" class="wider_input_login" name="add_user" >
+                <input type="checkbox" name="add_privilege" value="True"> Allow Add Privilege
+            </div>
 
-<!-- <div class="main"> -->
-  <div class="space_for_navbar_and_footer flex_center">
-  <div class="admin_page">
-    <div class="title">
-      <h1>Admin</h1>
-    </div>
+            <br/>
+            <button type="submit" class="btn btn-primary ml-3" name="confirm_selection" value=True>Confirm</button>
+        <br/>
+        <br/>
+        <i>
 
-    <div class="admin_db_sub">
-
-      <div class="std_framing ">
-
-
-        <div class="download_db_tables_form">
-
+        Note: This does not register a user or email it only allows an email to access the application. Once an email is
+         added to this list the email will be allowed to register through the normal process of clicking 'Register'.
+        </i>
         
-        Database Options
+        </form>
 
-
-        <!-- <div class="home_sub"> -->
-
-
-      
-          <div class="home_buttons">
-    
-            <a class="div_button home_register" href="{{ url_for('bp_admin.admin_db_download') }}">
-              Download
-            </a>
-            
-            <a class="div_button home_login" href="{{ url_for('bp_admin.admin_db_upload') }}">
-              Upload
-            </a>
-      
-          </div><!-- home_buttons -->
-    
-        <!-- </div> -->
-
-      </div><!-- download_db_tables_form -->
-      </div><!-- std_framing -->
-      <br>
-      <div class="std_framing">
-        Users Table
-
-        <div class="search-container">
-          <input type="text" id="myInput" onkeyup="searchTable()" placeholder="Search your user or rincón">
-        </div><!-- search-container -->
-
-        <div class="table_div">
-          <table id="myTable" class="display table nowrap responsive">
-            <thead>
-              
-              <tr>
-
-                <th>Username</th>
-                <th>Rincon Status (True = Admin)</th>
-
-              </tr>
-      
-            </thead>
-            <tbody>
-              {% for user in rincon_users %}
-              <tr>
-                <td>{{ user.username }}</td>
-                <td>
-                  {% for rincon in user.rincons %}
-                  <div class="rincon_admin_input_div">
-                    {{ rincon.rincon.name }} 
-
-                    <select id="true-false" name="user_{{ user.id}},rincon_{{ rincon.rincon.id }}"
-                    form="form_rincon_user_admin" >
-                      <option value="true" {% if rincon.permission_admin %} selected {% endif %} >True</option>
-                      <option value="false" {% if not rincon.permission_admin %} selected {% endif %}>False</option>
-                    </select>
-
-                  </div>
-                  {% endfor %}
-                </td>
-              </tr>
-              {% endfor %}
-            </tbody>
-      
-          </table>
-        </div><!-- table_div -->
-
-        <div class="btn_update_div">
-          <button type="submit" name="update_user_privileges" value="true" class="btn btn-primary"
-            form="form_rincon_user_admin">Update User Privileges</button>
-        </div>
-
-      </div><!-- std_framing -->
-
-      <br>
-      <div class="std_framing">
-        <a href="{{ url_for('bp_main.check_invite_json') }}">check_invite_json</a>
-
-      </div>
-
-    </div><!-- admin_db_sub -->
-
-  </div><!-- admin_db_page -->
-</div><!-- main -->
-
-<script src="../static/custom_js_and_css/searchTable.js"></script>
-
+    </div>
+  </div>
 {% endblock %}

@@ -90,7 +90,7 @@
                         <div class="link_records_div">
                             <div>
                                 Link this recall to another record:<br />
-                                {{ re_form.record_type }}<br /> <!-- Textbox 1 (dropdown, not typeable )-->
+                                {{ re_form.record_type(form="form_recalls_dash") }}<br /> <!-- Textbox 1 (dropdown, not typeable )-->
                                 <div class="">
                                     <input type="text" class="text_input_wide form-control" name="records_list"
                                         list="records_list3_list" form="form_recalls_dash">
@@ -116,7 +116,7 @@
 
                                 {{ i }}
                                 <a class="remove-image"
-                                    href="{{url_for('re_blueprint.delete_linked_record_recalls', re_id_for_dash=re_id_for_dash,linked_record= i )}}"
+                                    href="{{url_for('bp_recalls.delete_linked_record_recalls', re_id_for_dash=re_id_for_dash,linked_record= i )}}"
                                     style="display: inline;">&#215;</a>
                                 <br />
                                 {% endfor %}
@@ -135,12 +135,12 @@
                             {% if len(dash_re_list[26])>0 %}
 
                             {%for file in dash_re_list[26] %}
-                            <a
-                                href="{{ url_for('static', filename='files/'+ current_re_files_dir_name +'/' + file ) }}">
+                            <!-- <a href="{ url_for('static', filename='files/'+ current_re_files_dir_name +'/' + file ) }"> -->
+                            <a href="{{ url_for('bp_main.recall_or_investigation_file', dir_name='Recall_' + str(re_id_for_dash) , filename= file ) }}">
                                 {{ file }} </a>
                             <!--https://codepen.io/eliorivero/pen/zEFqb-->
                             <a class="remove-image"
-                                href="{{ url_for('re_blueprint.delete_file_re', re_id_for_dash=re_id_for_dash, filename = file) }}"
+                                href="{{ url_for('bp_recalls.delete_file_re', re_id_for_dash=re_id_for_dash, filename = file) }}"
                                 style="display: inline;">&#215;</a>
                             <br />
                             {% endfor %}

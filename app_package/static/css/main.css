@@ -12346,6 +12346,95 @@ textarea.form-control-lg {
     flex-wrap: nowrap;
   }
 }
+/* Rincon Comment Modal */
+.database_delete_data .modal-header {
+  background-color: orange;
+}
+
+/* Login Page */
+.login_page {
+  width: 95%;
+  padding: 3rem 0 0 0;
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.login_page .title {
+  width: 100%;
+}
+.login_page .login_form {
+  border-radius: 1.5em;
+  padding: 3rem 0 3rem 0;
+  width: calc(100% - 0.5rem);
+  font-size: 1.5em;
+  background-color: white;
+  display: flex;
+  justify-content: center;
+}
+.login_page .login_form .login_form_sub {
+  width: calc(100% - 1rem);
+}
+.login_page .login_form .email_form input,
+.login_page .login_form .password_form input {
+  width: 100%;
+}
+.login_page .login_form .element_right {
+  float: right;
+  padding-bottom: 2rem;
+}
+.login_page .login_form .show_password {
+  padding: 1rem 1rem;
+}
+.login_page .login_form .element_right_sub {
+  float: right;
+}
+.login_page .login_form .forgot_password {
+  font-size: 1rem;
+  padding-bottom: 3rem;
+}
+
+/* Register Page */
+.register_page {
+  width: 95%;
+  padding: 3rem 0 0 0;
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.register_page .title {
+  width: 100%;
+}
+.register_page .register_form {
+  border-radius: 1.5em;
+  padding: 3rem 0 3rem 0;
+  width: calc(100% - 0.5rem);
+  font-size: 1.5em;
+  background-color: white;
+  display: flex;
+  justify-content: center;
+}
+.register_page .register_form_sub {
+  width: calc(100% - 1rem);
+}
+.register_page .register_text {
+  width: 100%;
+}
+.register_page .submit_form_group {
+  float: right;
+  padding: 1rem 1rem 0 0;
+}
+.register_page .element_right {
+  float: right;
+}
+
+/* Databsase Page */
+.database_page .ul_no_bullets {
+  list-style-type: none; /* Remove bullets */
+}
+.database_page .file_input_div {
+  padding-left: 2rem;
+}
+
 :root {
   --nav-height: 123px;
 }
@@ -12441,82 +12530,6 @@ body {
   border: solid var(--bs-primary);
   border-width: 0.5rem;
   text-decoration: none;
-}
-
-/* Login Page */
-.login_page {
-  width: 95%;
-  padding: 3rem 0 0 0;
-  display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
-}
-.login_page .title {
-  width: 100%;
-}
-.login_page .login_form {
-  border-radius: 1.5em;
-  padding: 3rem 0 3rem 0;
-  width: calc(100% - 0.5rem);
-  font-size: 1.5em;
-  background-color: white;
-  display: flex;
-  justify-content: center;
-}
-.login_page .login_form .login_form_sub {
-  width: calc(100% - 1rem);
-}
-.login_page .login_form .email_form input,
-.login_page .login_form .password_form input {
-  width: 100%;
-}
-.login_page .login_form .element_right {
-  float: right;
-  padding-bottom: 2rem;
-}
-.login_page .login_form .show_password {
-  padding: 1rem 1rem;
-}
-.login_page .login_form .element_right_sub {
-  float: right;
-}
-.login_page .login_form .forgot_password {
-  font-size: 1rem;
-  padding-bottom: 3rem;
-}
-
-/* Register Page */
-.register_page {
-  width: 95%;
-  padding: 3rem 0 0 0;
-  display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
-}
-.register_page .title {
-  width: 100%;
-}
-.register_page .register_form {
-  border-radius: 1.5em;
-  padding: 3rem 0 3rem 0;
-  width: calc(100% - 0.5rem);
-  font-size: 1.5em;
-  background-color: white;
-  display: flex;
-  justify-content: center;
-}
-.register_page .register_form_sub {
-  width: calc(100% - 1rem);
-}
-.register_page .register_text {
-  width: 100%;
-}
-.register_page .submit_form_group {
-  float: right;
-  padding: 1rem 1rem 0 0;
-}
-.register_page .element_right {
-  float: right;
 }
 
 /* User Home */

@@ -10,7 +10,7 @@ import pandas as pd
 
 
 def category_list_dict_util():
-    categories_excel=os.path.join(current_app.config['UTILITY_FILES_FOLDER'], 'categories.xlsx')
+    categories_excel=os.path.join(current_app.config['DIR_DB_FILES_UTILITY'], 'categories.xlsx')
     df=pd.read_excel(categories_excel)
     category_list_dict={}
     for i in range(0,len(df.columns)):
@@ -43,7 +43,7 @@ def search_criteria_dictionary_util(formDict, query_file_name):
 
 
     # query_file_name='current_query_re.txt'
-    with open(os.path.join(current_app.config['QUERIES_FOLDER'],query_file_name),'w') as dict_file:
+    with open(os.path.join(current_app.config['DIR_DB_QUERIES'],query_file_name),'w') as dict_file:
         json.dump(search_query_dict,dict_file)
     print('END search_criteria_dictionary_util(formDict), returns query_file_name')
     return query_file_name
@@ -164,7 +164,7 @@ def update_files_util(filesDict, id_for_dash,record_type):
             return 'file_not_added'
     
     
-    current_files_dir=os.path.join(current_app.config['UPLOADED_FILES_FOLDER'], current_files_dir_name)
+    current_files_dir=os.path.join(current_app.config['DIR_DB_FILES'], current_files_dir_name)
 
     if not os.path.exists(current_files_dir):
         os.makedirs(current_files_dir)

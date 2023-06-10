@@ -6,7 +6,10 @@ import os
 import logging
 from logging.handlers import RotatingFileHandler
 import jinja2
-
+from app_package.bp_main.utils import create_categories_xlsx, existing_report
+from km03_models import sess, engine, text, Base, Users, Investigations, Tracking_inv, \
+    Saved_queries_inv, Recalls, Tracking_re, Saved_queries_re
+import shutil
 
 bp_main = Blueprint('bp_main', __name__)
 
@@ -49,8 +52,21 @@ def user_home():
     if not current_user.is_authenticated:
         return redirect(url_for('bp_main.home'))
 
-
+    logger_bp_main.info(f"- DIR_DB_FILES_UTILITY: {current_app.config.get('DIR_DB_FILES_UTILITY')}")
+    logger_bp_main.info(f"- DIR_DB_FILES_UTILTIES_TEST: {current_app.config.get('DIR_DB_FILES_UTILTIES_TEST')}")
     return render_template('main/user_home.html')
+
+
+
+# Custom static data
+@bp_main.route('/<dir_name>/<filename>')
+def recall_or_investigation_file(dir_name, filename):
+    # print("-- enterd custom static -")
+    # name_no_spaces = ""
+    # dir_name = 
+    
+    return send_from_directory(os.path.join(current_app.config.get('DB_ROOT'),"files", dir_name), filename)
+
 
 
 @bp_main.route("/temporarily_down", methods=["GET","POST"])
@@ -82,4 +98,75 @@ def test_undef():
 @bp_main.route("/test_error", methods=["GET","POST"])
 def test_error():
     raise AttributeError("This is a custom AttributeError")
+
+
+
+########################
+####### Reports ########
+########################
+
+@bp_main.route("/reports", methods=["GET","POST"])
+@login_required
+def reports():
+    excel_file_name_inv='investigation_report.xlsx'
+    excel_file_name_re='recalls_report.xlsx'
+    
+    #get columns from each reports
+    #Id/RECORD_ID removed from options -- if not included causes problems building excel file
+    column_names_inv=Investigations.__table__.columns.keys()[1:]
+    column_names_re=Recalls.__table__.columns.keys()[1:]
+
+    categories_dict_inv={}
+    categories_dict_re={}
+    if os.path.exists(os.path.join(
+        current_app.config['DIR_DB_FILES_UTILITY'],excel_file_name_inv)):
+        categories_dict_inv,time_stamp_inv=existing_report(excel_file_name_inv, 'investigations')
+        # print('categories_dict_inv:::', type(categories_dict_inv), categories_dict_inv)
+    else:
+        time_stamp_inv='no current file'
+    if os.path.exists(os.path.join(
+        current_app.config['DIR_DB_FILES_UTILITY'],excel_file_name_re)):
+        categories_dict_re,time_stamp_re=existing_report(excel_file_name_re,'recalls')
+    else:
+        time_stamp_re='no current file'
+
+    print('categories_dict_inv:::',categories_dict_inv)
+    # print('time_stamp_inv_df:::', time_stamp_inv, type(time_stamp_inv))
+    if request.method == 'POST':
+        print("---- POST ---- ")
+        formDict = request.form.to_dict()
+        print('reports - formDict::::',formDict)
+        # print("--------- ")
+        if formDict.get('build_excel_report_inv'):
+            
+            column_names_for_df = [i for i in column_names_inv if i in list(formDict.keys())]
+            
+            column_names_for_df.insert(0,'id')
+            print('column_names_for_df:::',column_names_for_df)
+            create_categories_xlsx(excel_file_name_inv, column_names_for_df, formDict, 'investigations')
+            
+        elif formDict.get('build_excel_report_re'):
+            column_names_for_df=[i for i in column_names_re if i in list(formDict.keys())]
+            column_names_for_df.insert(0,'RECORD_ID')
+            create_categories_xlsx(excel_file_name_re, column_names_for_df, formDict, 'recalls')
+        # logger_bp_inv.info('in search page')
+        # return redirect(url_for('bp_admin.reports'))
+        return redirect(request.url)
+    return render_template('main/reports.html', excel_file_name_inv=excel_file_name_inv, time_stamp_inv=time_stamp_inv,
+        column_names_inv=column_names_inv,column_names_re=column_names_re, categories_dict_inv=categories_dict_inv,
+        categories_dict_re=categories_dict_re,time_stamp_re=time_stamp_re, excel_file_name_re=excel_file_name_re)
+
+
+
+@bp_main.route("/files_zip", methods=["GET","POST"])
+@login_required
+def files_zip():
+    if os.path.exists(os.path.join(current_app.config['DIR_DB_FILES_UTILITY'],'Investigation_files')):
+        os.remove(os.path.join(current_app.config['DIR_DB_FILES_UTILITY'],'Investigation_files'))
+    shutil.make_archive(os.path.join(
+        current_app.config['DIR_DB_FILES_UTILITY'],'Investigation_files'), "zip", os.path.join(
+        current_app.config['DIR_DB_FILES']))
+
+    return send_from_directory(os.path.join(
+        current_app.config['DIR_DB_FILES_UTILITY']),'Investigation_files.zip', as_attachment=True)
 

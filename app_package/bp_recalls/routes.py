@@ -134,7 +134,7 @@ def search_recalls():
     
 
     #make make_list drop down options
-    with open(os.path.join(current_app.config['UTILITY_FILES_FOLDER'],'make_list_recalls.txt')) as json_file:
+    with open(os.path.join(current_app.config['DIR_DB_FILES_UTILITY'],'make_list_recalls.txt')) as json_file:
         make_list=json.load(json_file)
         json_file.close()
 
@@ -205,7 +205,7 @@ def recalls_dashboard():
 
     #for viewing and deleting files
     current_re_files_dir_name = 'Recall_'+str(re_id_for_dash)
-    current_re_files_dir=os.path.join(current_app.config['UPLOADED_FILES_FOLDER'], current_re_files_dir_name)
+    current_re_files_dir=os.path.join(current_app.config['DIR_DB_FILES'], current_re_files_dir_name)
 
 
     #pass check or no check for current_user
@@ -441,8 +441,8 @@ def delete_file_re(re_id_for_dash,filename):
     #Remove files from files dir
     # current_re_files_dir_name = str(dash_re.RECORD_ID) + '_'+str(re_id_for_dash)
     current_re_files_dir_name = 'Recall_'+str(re_id_for_dash)
-    current_re_files_dir=os.path.join(current_app.config['UPLOADED_FILES_FOLDER'], current_re_files_dir_name)
-    files_dir_and_filename=os.path.join(current_app.config['UPLOADED_FILES_FOLDER'],
+    current_re_files_dir=os.path.join(current_app.config['DIR_DB_FILES'], current_re_files_dir_name)
+    files_dir_and_filename=os.path.join(current_app.config['DIR_DB_FILES'],
         current_re_files_dir_name, filename)
     
     if os.path.exists(files_dir_and_filename):

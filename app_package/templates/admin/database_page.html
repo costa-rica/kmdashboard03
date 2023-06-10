@@ -2,10 +2,11 @@
 {% block main %}
 <form method="POST" enctype="multipart/form-data" id="form_db_upload"></form>
 <form method="POST" enctype="multipart/form-data" id="form_db_download"></form>
+<form method="POST" id="form_modal_delete" ></form>
 
 <!-- <div class="main"> -->
   <div class="space_for_navbar_and_footer flex_center">
-	<section class="database_page" id="database_page">
+	<div class="database_page" id="database_page">
     <div class="container">
 
 
@@ -35,11 +36,17 @@
 	link the sheet in the uploaded file to the appropriate database table.</div><br/>
 	
 	Select file type:<br/>
-	<input type="radio" name="file_type" value="excel" form="form_db_upload"> Excel (Upload a database backup)<br/>
-	<input type="radio" name="file_type" value="text" checked=true form="form_db_upload"> Zipped Text File (from <a href="https://www-odi.nhtsa.dot.gov/downloads/">NHTSA ODI</a>)<br/>
-	
+	<ul class= "ul_no_bullets">
+		<li><input type="radio" name="file_type" value="excel" form="form_db_upload"> Excel (Upload a database backup)</li>
+		<li><input type="radio" name="file_type" value="text" checked=true form="form_db_upload"> Zipped Text File (from <a href="https://www-odi.nhtsa.dot.gov/downloads/">NHTSA ODI</a>)</li>
+		
+	</ul>
+
 	Select file for upload:<br/>
-	<input type="file" class="form-control" name="fileUpload" form="form_db_upload"/><br/>
+	<div class="file_input_div">
+		<input type="file" class="form-control" name="fileUpload" form="form_db_upload"/><br/>
+	</div>
+	
 	<button type="submit" class="btn btn-primary" name="uploadFileButton" value=True form="form_db_upload">Upload File</button><br/>
 	
 
@@ -49,10 +56,23 @@
 	<h5>Delete contents in database table</h5>
 	<div style="color: gray"> The link below will take you to a form to delete tables.</div><br/>
 	<!-- <a href="{ url_for('bp_users.database_delete_data')  }"><h5>Clear Database Tables Form</h5></a> -->
+	<button type="button"  class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#deleteModal" >
+		Delete Database
+</button>
 	
+
+
 <!-- </form> -->
 </div>
-</section>
 </div>
+</div>
+
+
+
+  <!-- Modal  -->
+  <div class="modal" tabindex="-1" role="dialog" id="deleteModal">
+    {% include "modals/database_delete_data.html" %}
+  </div>
+
 
 {% endblock %}

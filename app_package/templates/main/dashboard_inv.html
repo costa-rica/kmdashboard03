@@ -87,7 +87,7 @@
                         <div class="link_records_div">
                             <div>
                                 Link this investigation to another record:<br />
-                                {{ inv_form.record_type }}<br />
+                                {{ inv_form.record_type(form="form_investigations_dash") }}<br />
 
                                 <div class="text_input_links">
                                     <input type="text" class="text_input_wide form-control" name="records_list"
@@ -135,8 +135,8 @@
                             {% if len(dash_inv_list[13])>0 %}
 
                             {%for file in dash_inv_list[13] %}
-                            <a
-                                href="{{ url_for('static', filename='files/' + current_inv_files_dir_name + '/' + file ) }}">
+                            <!-- <a href="{ url_for('static', filename='files/' + current_inv_files_dir_name + '/' + file ) }"> -->
+                            <a href="{{ url_for('bp_main.recall_or_investigation_file', dir_name='Investigation_' + str(inv_id_for_dash), filename= file ) }}">
                                 {{ file }} </a>
                             <!--https://codepen.io/eliorivero/pen/zEFqb-->
                             <a class="remove-image"
@@ -159,7 +159,8 @@
                         {% if inv_id_for_dash =='no investigations found' %}
                         No record to update
                         {% else %}
-                        <input type="submit" class="btn btn-primary" name="update_inv" value="Update">
+                        <input type="submit" class="btn btn-primary" name="update_inv" value="Update"
+                        form="form_investigations_dash">
 
                         <div class="verify_box_and_label">
                             <input type="checkbox" class="unique_name_checkbox" name="verified_by_user"

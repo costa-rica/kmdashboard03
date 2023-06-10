@@ -17,8 +17,10 @@ from wsgiref.util import FileWrapper
 import xlsxwriter
 from flask_mail import Message
 from app_package.bp_investigations.utils import investigations_query_util, queryToDict, \
-    create_categories_xlsx, existing_report, column_names_inv_util, \
+    column_names_inv_util, \
     column_names_dict_inv_util, update_investigation
+    # create_categories_xlsx, existing_report,
+
 import openpyxl
 from werkzeug.utils import secure_filename
 import json
@@ -141,7 +143,7 @@ def search_investigations():
     
 
     #make make_list drop down options
-    with open(os.path.join(current_app.config['UTILITY_FILES_FOLDER'],'make_list_investigations.txt')) as json_file:
+    with open(os.path.join(current_app.config['DIR_DB_FILES_UTILITY'],'make_list_investigations.txt')) as json_file:
         make_list=json.load(json_file)
         json_file.close()
 
@@ -219,7 +221,7 @@ def investigations_dashboard():
 
     #for viewing and deleting files
     current_inv_files_dir_name = 'Investigation_'+str(inv_id_for_dash)
-    current_inv_files_dir=os.path.join(current_app.config['UPLOADED_FILES_FOLDER'], current_inv_files_dir_name)
+    current_inv_files_dir=os.path.join(current_app.config['DIR_DB_FILES'], current_inv_files_dir_name)
 
 
     #pass check or no check for current_user
@@ -423,8 +425,8 @@ def delete_file_inv(inv_id_for_dash,filename):
     
     #Remove files from files dir
     current_inv_files_dir_name = 'Investigation_'+str(inv_id_for_dash)
-    current_inv_files_dir=os.path.join(current_app.config['UPLOADED_FILES_FOLDER'], current_inv_files_dir_name)
-    files_dir_and_filename=os.path.join(current_app.config['UPLOADED_FILES_FOLDER'],
+    current_inv_files_dir=os.path.join(current_app.config['DIR_DB_FILES'], current_inv_files_dir_name)
+    files_dir_and_filename=os.path.join(current_app.config['DIR_DB_FILES'],
         current_inv_files_dir_name, filename)
     
     if os.path.exists(files_dir_and_filename):
@@ -438,67 +440,72 @@ def delete_file_inv(inv_id_for_dash,filename):
 
 
 
-@bp_investigations.route("/reports", methods=["GET","POST"])
-@login_required
-def reports():
-    excel_file_name_inv='investigation_report.xlsx'
-    excel_file_name_re='recalls_report.xlsx'
+
+################################
+####### moved to bp_main ########
+################################
+
+# @bp_investigations.route("/reports", methods=["GET","POST"])
+# @login_required
+# def reports():
+#     excel_file_name_inv='investigation_report.xlsx'
+#     excel_file_name_re='recalls_report.xlsx'
     
-    #get columns from each reports
-    #Id/RECORD_ID removed from options -- if not included causes problems building excel file
-    column_names_inv=Investigations.__table__.columns.keys()[1:]
-    column_names_re=Recalls.__table__.columns.keys()[1:]
+#     #get columns from each reports
+#     #Id/RECORD_ID removed from options -- if not included causes problems building excel file
+#     column_names_inv=Investigations.__table__.columns.keys()[1:]
+#     column_names_re=Recalls.__table__.columns.keys()[1:]
 
-    categories_dict_inv={}
-    categories_dict_re={}
-    if os.path.exists(os.path.join(
-        current_app.config['UTILITY_FILES_FOLDER'],excel_file_name_inv)):
-        categories_dict_inv,time_stamp_inv=existing_report(excel_file_name_inv, 'investigations')
-        # print('categories_dict_inv:::', type(categories_dict_inv), categories_dict_inv)
-    else:
-        time_stamp_inv='no current file'
-    if os.path.exists(os.path.join(
-        current_app.config['UTILITY_FILES_FOLDER'],excel_file_name_re)):
-        categories_dict_re,time_stamp_re=existing_report(excel_file_name_re,'recalls')
-    else:
-        time_stamp_re='no current file'
+#     categories_dict_inv={}
+#     categories_dict_re={}
+#     if os.path.exists(os.path.join(
+#         current_app.config['DIR_DB_FILES_UTILITY'],excel_file_name_inv)):
+#         categories_dict_inv,time_stamp_inv=existing_report(excel_file_name_inv, 'investigations')
+#         # print('categories_dict_inv:::', type(categories_dict_inv), categories_dict_inv)
+#     else:
+#         time_stamp_inv='no current file'
+#     if os.path.exists(os.path.join(
+#         current_app.config['DIR_DB_FILES_UTILITY'],excel_file_name_re)):
+#         categories_dict_re,time_stamp_re=existing_report(excel_file_name_re,'recalls')
+#     else:
+#         time_stamp_re='no current file'
 
-    print('categories_dict_inv:::',categories_dict_inv)
-    # print('time_stamp_inv_df:::', time_stamp_inv, type(time_stamp_inv))
-    if request.method == 'POST':
-        formDict = request.form.to_dict()
-        print('reports - formDict::::',formDict)
-        if formDict.get('build_excel_report_inv'):
+#     print('categories_dict_inv:::',categories_dict_inv)
+#     # print('time_stamp_inv_df:::', time_stamp_inv, type(time_stamp_inv))
+#     if request.method == 'POST':
+#         formDict = request.form.to_dict()
+#         print('reports - formDict::::',formDict)
+#         if formDict.get('build_excel_report_inv'):
             
-            column_names_for_df = [i for i in column_names_inv if i in list(formDict.keys())]
+#             column_names_for_df = [i for i in column_names_inv if i in list(formDict.keys())]
             
-            column_names_for_df.insert(0,'id')
-            print('column_names_for_df:::',column_names_for_df)
-            create_categories_xlsx(excel_file_name_inv, column_names_for_df, formDict, 'investigations')
+#             column_names_for_df.insert(0,'id')
+#             print('column_names_for_df:::',column_names_for_df)
+#             create_categories_xlsx(excel_file_name_inv, column_names_for_df, formDict, 'investigations')
             
-        elif formDict.get('build_excel_report_re'):
-            column_names_for_df=[i for i in column_names_re if i in list(formDict.keys())]
-            column_names_for_df.insert(0,'RECORD_ID')
-            create_categories_xlsx(excel_file_name_re, column_names_for_df, formDict, 'recalls')
-        logger_bp_inv.info('in search page')
-        return redirect(url_for('bp_investigations.reports'))
-    return render_template('reports.html', excel_file_name_inv=excel_file_name_inv, time_stamp_inv=time_stamp_inv,
-        column_names_inv=column_names_inv,column_names_re=column_names_re, categories_dict_inv=categories_dict_inv,
-        categories_dict_re=categories_dict_re,time_stamp_re=time_stamp_re, excel_file_name_re=excel_file_name_re)
+#         elif formDict.get('build_excel_report_re'):
+#             column_names_for_df=[i for i in column_names_re if i in list(formDict.keys())]
+#             column_names_for_df.insert(0,'RECORD_ID')
+#             create_categories_xlsx(excel_file_name_re, column_names_for_df, formDict, 'recalls')
+#         logger_bp_inv.info('in search page')
+#         return redirect(url_for('bp_investigations.reports'))
+#     return render_template('main/reports.html', excel_file_name_inv=excel_file_name_inv, time_stamp_inv=time_stamp_inv,
+#         column_names_inv=column_names_inv,column_names_re=column_names_re, categories_dict_inv=categories_dict_inv,
+#         categories_dict_re=categories_dict_re,time_stamp_re=time_stamp_re, excel_file_name_re=excel_file_name_re)
 
 
 
-@bp_investigations.route("/files_zip", methods=["GET","POST"])
-@login_required
-def files_zip():
-    if os.path.exists(os.path.join(current_app.config['UTILITY_FILES_FOLDER'],'Investigation_files')):
-        os.remove(os.path.join(current_app.config['UTILITY_FILES_FOLDER'],'Investigation_files'))
-    shutil.make_archive(os.path.join(
-        current_app.config['UTILITY_FILES_FOLDER'],'Investigation_files'), "zip", os.path.join(
-        current_app.config['UPLOADED_FILES_FOLDER']))
+# @bp_investigations.route("/files_zip", methods=["GET","POST"])
+# @login_required
+# def files_zip():
+#     if os.path.exists(os.path.join(current_app.config['DIR_DB_FILES_UTILITY'],'Investigation_files')):
+#         os.remove(os.path.join(current_app.config['DIR_DB_FILES_UTILITY'],'Investigation_files'))
+#     shutil.make_archive(os.path.join(
+#         current_app.config['DIR_DB_FILES_UTILITY'],'Investigation_files'), "zip", os.path.join(
+#         current_app.config['DIR_DB_FILES']))
 
-    return send_from_directory(os.path.join(
-        current_app.config['UTILITY_FILES_FOLDER']),'Investigation_files.zip', as_attachment=True)
+#     return send_from_directory(os.path.join(
+#         current_app.config['DIR_DB_FILES_UTILITY']),'Investigation_files.zip', as_attachment=True)
 
 
 @bp_investigations.route("/categories_report_download", methods=["GET","POST"])
@@ -507,7 +514,7 @@ def categories_report_download():
     excel_file_name=request.args.get('excel_file_name')
 
     return send_from_directory(os.path.join(
-        current_app.config['UTILITY_FILES_FOLDER']),excel_file_name, as_attachment=True)
+        current_app.config['DIR_DB_FILES_UTILITY']),excel_file_name, as_attachment=True)
 
 
 
