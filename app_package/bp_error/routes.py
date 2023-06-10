@@ -73,27 +73,27 @@ def handle_502(err):
     logger_bp_error.info(f'- request.referrer: {request.referrer}')
     logger_bp_error.info(f'- request.url: {request.url}')
     error_message = f"Could be anything... ¯\_(ツ)_/¯  ... try again or send email to {current_app.config['MAIL_USERNAME']}."
-    return render_template('error_template.html', error_number="500", error_message=error_message)
+    return render_template('error_template.html', error_number="502", error_message=error_message)
 
 
-# if os.environ.get('CONFIG_TYPE')=='prod':
+if os.environ.get('CONFIG_TYPE')=='prod':
 
-@bp_error.app_errorhandler(AttributeError)
-@bp_error.app_errorhandler(KeyError)
-@bp_error.app_errorhandler(TypeError)
-@bp_error.app_errorhandler(FileNotFoundError)
-@bp_error.app_errorhandler(ValueError)
-# def error_key(FileNotFoundError):
-def error_key(e):
-    error_message = f"Could be anything... ¯\_(ツ)_/¯  ... try again or send email to {current_app.config['MAIL_USERNAME']}."
-    return render_template('error_template_app_error.html', error_number="", error_message=e)
+    @bp_error.app_errorhandler(AttributeError)
+    @bp_error.app_errorhandler(KeyError)
+    @bp_error.app_errorhandler(TypeError)
+    @bp_error.app_errorhandler(FileNotFoundError)
+    @bp_error.app_errorhandler(ValueError)
+    # def error_key(FileNotFoundError):
+    def error_key(e):
+        error_message = f"Could be anything... ¯\_(ツ)_/¯  ... try again or send email to {current_app.config['MAIL_USERNAME']}."
+        return render_template('error_template_app_error.html', error_number="", error_message=e)
 
 
-@bp_error.app_errorhandler(jinja2.exceptions.TemplateNotFound)
-@bp_error.app_errorhandler(jinja2.exceptions.UndefinedError)
-@bp_error.app_errorhandler(werkzeug.routing.exceptions.BuildError)
-def error_key(e):
-    error_message = f"Could be anything... ¯\_(ツ)_/¯  ... try again or send email to {current_app.config['MAIL_USERNAME']}."
-    return render_template('error_template_app_error.html', error_number="", error_message=e,
-    error_message_2 = e)
+    @bp_error.app_errorhandler(jinja2.exceptions.TemplateNotFound)
+    @bp_error.app_errorhandler(jinja2.exceptions.UndefinedError)
+    @bp_error.app_errorhandler(werkzeug.routing.exceptions.BuildError)
+    def error_key(e):
+        error_message = f"Could be anything... ¯\_(ツ)_/¯  ... try again or send email to {current_app.config['MAIL_USERNAME']}."
+        return render_template('error_template_app_error.html', error_number="", error_message=e,
+        error_message_2 = e)
 
