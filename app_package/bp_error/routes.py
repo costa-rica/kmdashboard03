@@ -68,7 +68,7 @@ def handle_500(err):
     return render_template('error_template.html', error_number="500", error_message=error_message)
 
 @bp_error.app_errorhandler(502)
-def handle_500(err):
+def handle_502(err):
     logger_bp_error.info(f'@bp_error.app_errorhandler(502), err: {err}')
     logger_bp_error.info(f'- request.referrer: {request.referrer}')
     logger_bp_error.info(f'- request.url: {request.url}')
