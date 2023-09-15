@@ -42,7 +42,16 @@ def before_request():
 @bp_main.route("/", methods=["GET","POST"])
 def home():
     logger_bp_main.info(f"-- in home page route --")
+    if request.method == 'POST':
+        # session.permanent = True
+        formDict = request.form.to_dict()
+        # print(f"formDict: {formDict}")
+        # login_as_guest = formDict.get('login_as_guest')
+        # print(login_as_guest)
 
+        guest_user = sess.query(Users).filter_by(email=current_app.config.get('GUEST_EMAIL')).first()
+        login_user(guest_user)
+        return redirect(url_for('bp_main.user_home'))
 
     return render_template('main/home.html')
 

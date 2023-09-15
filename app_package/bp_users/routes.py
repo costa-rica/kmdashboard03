@@ -175,7 +175,7 @@ def reset_password():
             flash('Email has been sent with instructions to reset your password','info')
             # return redirect(url_for('bp_users.login'))
         else:
-            flash('Email has not been registered with What Sticks','warning')
+            flash('Email has not been registered with NHTSA Data Dashboard','warning')
 
         return redirect(url_for('bp_users.reset_password'))
     return render_template('users/reset_request.html', page_name = page_name)

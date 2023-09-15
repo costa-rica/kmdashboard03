@@ -1,5 +1,6 @@
 {% extends "_layout.html" %}
 {% block main %}
+<form method="POST" enctype="multipart/form-data" id="form_login_as_guest"></form>
 <!-- <div class="main"> -->
 <div class="space_for_navbar_and_footer flex_center">
 
@@ -47,6 +48,8 @@
 
       <div class="home_buttons">
 
+        <button type="submit" class="div_button home_login_guest" name="login_as_guest" value=True form="form_login_as_guest">Login as Guest</button><br/>
+	
         <a class="div_button home_register" href="{{ url_for('bp_users.register') }}">
           Register
         </a>

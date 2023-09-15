@@ -108,6 +108,7 @@ body {
     color: var(--bs-gray-200);
     margin-bottom: 1rem;
     text-decoration: none;
+    opacity: 0.5;
   }
 
   .home_login {
@@ -115,7 +116,16 @@ body {
     border: solid var(--bs-primary);
     border-width: .5rem;
     text-decoration: none;
+    opacity: 0.5;
+  }
 
+  .home_login_guest {
+    color: var(--bs-primary);
+    border: solid var(--bs-primary);
+    border-width: .5rem;
+    text-decoration: none;
+    margin-top:1rem;
+    margin-bottom:1rem;
   }
 
 
