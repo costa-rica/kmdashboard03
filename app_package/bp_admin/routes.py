@@ -168,6 +168,9 @@ def database_page():
             # return redirect(url_for('users.database_page'))
         elif formDict.get('btn_database_delete') and formDict.get('database_delete_verify') == 'delete':
             logger_bp_admin.info("* Delete database")
+            if current_user.email == current_app.config.get('GUEST_EMAIL'):
+                flash("Guest user cannot delete", "info")
+                return redirect(request.url)
 
             
             sess.query(Investigations).delete()
