@@ -1,6 +1,6 @@
 from flask import Blueprint
 from flask import render_template, url_for, redirect, flash, request, abort, session,\
-    Response, current_app, send_from_directory, jsonify
+    Response, current_app, send_from_directory, jsonify, g
 from app_package import mail
 # from km03_models import sess, engine, text, Base, Users, Investigations, Tracking_inv, \
 #     Saved_queries_inv, Recalls, Tracking_re, Saved_queries_re
@@ -90,7 +90,7 @@ def before_request():
 @bp_investigations.route("/search_investigations", methods=["GET","POST"])
 @login_required
 def search_investigations():
-    print('*TOP OF def search_investigations()*')
+    db_session = g.db_session
     logger_bp_inv.info('in search_investigations page')
     category_list = [y for x in category_list_dict_util().values() for y in x]
     column_names=column_names_inv_util()
@@ -105,14 +105,14 @@ def search_investigations():
         
     
     #user_list for searching userlist
-    user_list=sess.query(Tracking_inv.updated_to).filter(Tracking_inv.field_updated=='verified_by_user').distinct().all()
+    user_list=db_session.query(Tracking_inv.updated_to).filter(Tracking_inv.field_updated=='verified_by_user').distinct().all()
     user_list=[i[0] for i in user_list]
 
     #Get/identify query to run for table
     if request.args.get('query_file_name'):
         # print('does this fire???')
         query_file_name=request.args.get('query_file_name')
-        investigations_query, search_criteria_dictionary, category_dict = investigations_query_util(query_file_name)
+        investigations_query, search_criteria_dictionary, category_dict = investigations_query_util(query_file_name, db_session)
         no_hits_flag = False
         if len(investigations_query) ==0:
             no_hits_flag = True
@@ -120,7 +120,7 @@ def search_investigations():
         investigations_query, search_criteria_dictionary = ([],{})
     else:
         query_file_name= 'default_query_inv.txt'
-        investigations_query, search_criteria_dictionary, category_dict = investigations_query_util(query_file_name)
+        investigations_query, search_criteria_dictionary, category_dict = investigations_query_util(query_file_name, db_session)
         # print('does thre default_query_inv.txt:::')
         # print('length of investigations_query::::',len(investigations_query))
         no_hits_flag = False
@@ -141,21 +141,15 @@ def search_investigations():
         print('limit_flag NOT fired')
         investigation_data_list=investigations_data
 
-
-    
-
     #make make_list drop down options
     with open(os.path.join(current_app.config['DIR_DB_FILES_UTILITY'],'make_list_investigations.txt')) as json_file:
         make_list=json.load(json_file)
         json_file.close()
 
     if request.method == 'POST':
-        print('!!!!in POST method no_hits_flag:::', no_hits_flag)
         formDict = request.form.to_dict()
-        print('formDict:::',formDict)
         limit_flag=formDict.get('limit_flag')
         if formDict.get('refine_search_button'):
-            print('@@@@@@ refine_search_button')
             query_file_name = search_criteria_dictionary_util(formDict, 'current_query_inv.txt')
             
             return redirect(url_for('bp_investigations.search_investigations', query_file_name=query_file_name, no_hits_flag=no_hits_flag,
@@ -171,15 +165,12 @@ def search_investigations():
         elif formDict.get('add_category'):
             new_category='sc_category' + str(len(category_dict)+1)
             formDict[new_category]=''
-            # del formDict['add_category']
-            # formDict['add_category']=''
             query_file_name = search_criteria_dictionary_util(formDict, 'current_query_inv.txt')
             return redirect(url_for('bp_investigations.search_investigations', query_file_name=query_file_name, no_hits_flag=no_hits_flag,
                 limit_flag=limit_flag))
         elif formDict.get('remove_category'):
             
             category_for_remove = 'sc_'+formDict['remove_category']
-            # del category_dict[formDict['remove_category']]
             form_dict_cat_element = 'sc_' + formDict['remove_category']
             print('form_dict_cat_element:::',form_dict_cat_element)
             
@@ -207,14 +198,15 @@ def search_investigations():
 @login_required
 def investigations_dashboard():
     print('*TOP OF def dashboard()*')
+    db_session = g.db_session
     inv_form=InvForm()
     
     #view, update
     if request.args.get('inv_id_for_dash'):
         # print('request.args.get(inv_id_for_dash, should build verified_by_list')
         inv_id_for_dash = int(request.args.get('inv_id_for_dash'))
-        dash_inv= sess.query(Investigations).get(inv_id_for_dash)
-        verified_by_list =sess.query(Tracking_inv.updated_to, Tracking_inv.time_stamp).filter_by(
+        dash_inv= db_session.query(Investigations).get(inv_id_for_dash)
+        verified_by_list =db_session.query(Tracking_inv.updated_to, Tracking_inv.time_stamp).filter_by(
             investigations_table_id=inv_id_for_dash,field_updated='verified_by_user').all()
         verified_by_list=[[i[0],i[1].strftime('%Y/%m/%d %#I:%M%p')] for i in verified_by_list]
         # print('verified_by_list:::',verified_by_list)
@@ -326,9 +318,9 @@ def investigations_dashboard():
             #This can only be case if update + user verified previously but no unchecked
             if (current_user.email in verified_by_list_util) and (
                 formDict.get('verified_by_user')==None):
-                sess.query(Tracking_inv).filter_by(investigations_table_id=int(inv_id_for_dash),
+                db_session.query(Tracking_inv).filter_by(investigations_table_id=int(inv_id_for_dash),
                     field_updated='verified_by_user',updated_to=current_user.email).delete()
-                sess.commit()
+                db_session.commit()
             
             
             return redirect(url_for('bp_investigations.investigations_dashboard', inv_id_for_dash=inv_id_for_dash,
@@ -360,7 +352,7 @@ def investigations_dashboard():
             #check if linked record has
             if formDict.get('record_type')=='investigations':
                 #get query of linked record:
-                dash_inv_linked= sess.query(Investigations).get(int(record_list_id))
+                dash_inv_linked= db_session.query(Investigations).get(int(record_list_id))
                 if dash_inv_linked.linked_records!= None and dash_inv_linked.linked_records!= '':
                     linked_records_dict_for_linked=json.loads(dash_inv_linked.linked_records)
                     linked_records_dict_for_linked['investigations'+str(inv_id_for_dash)]=specified_to_current
@@ -368,7 +360,7 @@ def investigations_dashboard():
                     linked_records_dict_for_linked={'investigations'+str(inv_id_for_dash):specified_to_current}
             elif formDict.get('record_type')=='recalls':
                 #get query of linked record:
-                dash_inv_linked= sess.query(Recalls).get(int(record_list_id))
+                dash_inv_linked= db_session.query(Recalls).get(int(record_list_id))
                 if dash_inv_linked.linked_records!= None and dash_inv_linked.linked_records!= '':
                     linked_records_dict_for_linked=json.loads(dash_inv_linked.linked_records)
                     linked_records_dict_for_linked['investigations'+str(inv_id_for_dash)]=specified_to_current
@@ -378,7 +370,7 @@ def investigations_dashboard():
             #add list to current record db linked_record
             dash_inv.linked_records=json.dumps(linked_records_dict_current)
             dash_inv_linked.linked_records=json.dumps(linked_records_dict_for_linked)
-            sess.commit()
+            db_session.flush()
             
             
             return redirect(url_for('bp_investigations.investigations_dashboard', record_type=record_type, 
@@ -398,7 +390,8 @@ def investigations_dashboard():
 @login_required
 def delete_file_inv(inv_id_for_dash,filename):
     #update Investigations table files column
-    dash_inv =sess.query(Investigations).get(inv_id_for_dash)
+    db_session = g.db_session
+    dash_inv =db_session.query(Investigations).get(inv_id_for_dash)
     update_from=dash_inv.files
     print('delete_file route - dash_inv::::',dash_inv.files)
     file_list=''
@@ -407,23 +400,17 @@ def delete_file_inv(inv_id_for_dash,filename):
         file_list=dash_inv.files.split(",")
         file_list.remove(filename)
     dash_inv.files=''
-    sess.commit()
+    db_session.flush()
     if len(file_list)>0:
         for i in range(0,len(file_list)):
             if i==0:
                 dash_inv.files = file_list[i]
             else:
                 dash_inv.files = dash_inv.files +',' + file_list[i]
-    sess.commit()
+    db_session.flush()
     
     #update tracking
-    track_util('investigations', 'files',update_from, dash_inv.files,inv_id_for_dash)
-    # newTrack=Tracking_inv(field_updated='files',
-        # updated_to=dash_inv.files, updated_by=current_user.id,
-        # investigations_table_id=inv_id_for_dash)
-    # sess.add(newTrack)
-    # sess.commit()
-    
+    track_util('investigations', 'files',update_from, dash_inv.files,inv_id_for_dash)   
     
     #Remove files from files dir
     current_inv_files_dir_name = 'Investigation_'+str(inv_id_for_dash)
@@ -441,73 +428,6 @@ def delete_file_inv(inv_id_for_dash,filename):
     return redirect(url_for('bp_investigations.investigations_dashboard', inv_id_for_dash=inv_id_for_dash))
 
 
-
-
-################################
-####### moved to bp_main ########
-################################
-
-# @bp_investigations.route("/reports", methods=["GET","POST"])
-# @login_required
-# def reports():
-#     excel_file_name_inv='investigation_report.xlsx'
-#     excel_file_name_re='recalls_report.xlsx'
-    
-#     #get columns from each reports
-#     #Id/RECORD_ID removed from options -- if not included causes problems building excel file
-#     column_names_inv=Investigations.__table__.columns.keys()[1:]
-#     column_names_re=Recalls.__table__.columns.keys()[1:]
-
-#     categories_dict_inv={}
-#     categories_dict_re={}
-#     if os.path.exists(os.path.join(
-#         current_app.config['DIR_DB_FILES_UTILITY'],excel_file_name_inv)):
-#         categories_dict_inv,time_stamp_inv=existing_report(excel_file_name_inv, 'investigations')
-#         # print('categories_dict_inv:::', type(categories_dict_inv), categories_dict_inv)
-#     else:
-#         time_stamp_inv='no current file'
-#     if os.path.exists(os.path.join(
-#         current_app.config['DIR_DB_FILES_UTILITY'],excel_file_name_re)):
-#         categories_dict_re,time_stamp_re=existing_report(excel_file_name_re,'recalls')
-#     else:
-#         time_stamp_re='no current file'
-
-#     print('categories_dict_inv:::',categories_dict_inv)
-#     # print('time_stamp_inv_df:::', time_stamp_inv, type(time_stamp_inv))
-#     if request.method == 'POST':
-#         formDict = request.form.to_dict()
-#         print('reports - formDict::::',formDict)
-#         if formDict.get('build_excel_report_inv'):
-            
-#             column_names_for_df = [i for i in column_names_inv if i in list(formDict.keys())]
-            
-#             column_names_for_df.insert(0,'id')
-#             print('column_names_for_df:::',column_names_for_df)
-#             create_categories_xlsx(excel_file_name_inv, column_names_for_df, formDict, 'investigations')
-            
-#         elif formDict.get('build_excel_report_re'):
-#             column_names_for_df=[i for i in column_names_re if i in list(formDict.keys())]
-#             column_names_for_df.insert(0,'RECORD_ID')
-#             create_categories_xlsx(excel_file_name_re, column_names_for_df, formDict, 'recalls')
-#         logger_bp_inv.info('in search page')
-#         return redirect(url_for('bp_investigations.reports'))
-#     return render_template('main/reports.html', excel_file_name_inv=excel_file_name_inv, time_stamp_inv=time_stamp_inv,
-#         column_names_inv=column_names_inv,column_names_re=column_names_re, categories_dict_inv=categories_dict_inv,
-#         categories_dict_re=categories_dict_re,time_stamp_re=time_stamp_re, excel_file_name_re=excel_file_name_re)
-
-
-
-# @bp_investigations.route("/files_zip", methods=["GET","POST"])
-# @login_required
-# def files_zip():
-#     if os.path.exists(os.path.join(current_app.config['DIR_DB_FILES_UTILITY'],'Investigation_files')):
-#         os.remove(os.path.join(current_app.config['DIR_DB_FILES_UTILITY'],'Investigation_files'))
-#     shutil.make_archive(os.path.join(
-#         current_app.config['DIR_DB_FILES_UTILITY'],'Investigation_files'), "zip", os.path.join(
-#         current_app.config['DIR_DB_FILES']))
-
-#     return send_from_directory(os.path.join(
-#         current_app.config['DIR_DB_FILES_UTILITY']),'Investigation_files.zip', as_attachment=True)
 
 
 @bp_investigations.route("/categories_report_download", methods=["GET","POST"])
@@ -535,11 +455,12 @@ def get_record(record_type,inv_id_for_dash):
 @bp_investigations.route('/delete_linked_record_investigations/<inv_id_for_dash>/<linked_record>', methods=["GET","POST"])
 @login_required
 def delete_linked_record_investigations(inv_id_for_dash,linked_record):
+    db_session = g.db_session
     print('ENTER -delete_linked_record')
     print('inv_id_for_dash::::', inv_id_for_dash)
     print('linked_record::::',linked_record)
     #get current record sqlalchemy
-    current_record=sess.query(Investigations).get(int(inv_id_for_dash))
+    current_record=db_session.query(Investigations).get(int(inv_id_for_dash))
     
     #get linked_record_type
     #get linked_record id
@@ -563,9 +484,9 @@ def delete_linked_record_investigations(inv_id_for_dash,linked_record):
     #Edit LINKED_RECORD's linked record
     #get linked reocrd sqlalchemy
     if linked_record[0:3]=="Inv":
-        linked_record_sql=sess.query(Investigations).get(int(linked_record_id))
+        linked_record_sql=db_session.query(Investigations).get(int(linked_record_id))
     elif linked_record[0:3]=="Rec":
-        linked_record_sql=sess.query(Recalls).get(int(linked_record_id))
+        linked_record_sql=db_session.query(Recalls).get(int(linked_record_id))
         
     #make current_record_key= 'investigations' + id
     current_record_key='investigations' + inv_id_for_dash
@@ -574,7 +495,7 @@ def delete_linked_record_investigations(inv_id_for_dash,linked_record):
     print('linked_records_dict::::',linked_records_dict)
     del linked_records_dict[current_record_key]
     linked_record_sql.linked_records=json.dumps(linked_records_dict)
-    sess.commit()
+    db_session.flush()
     print('linked_records_dict after deleted and should be in selected linked_records::::',linked_records_dict)
     return redirect(url_for('bp_investigations.investigations_dashboard', inv_id_for_dash=inv_id_for_dash))
 

@@ -47,8 +47,8 @@ def queryToDict(query_data, column_names):
     return db_row_list
 
 
-def recalls_query_util(query_file_name):
-    recalls = sess.query(Recalls)
+def recalls_query_util(query_file_name, db_session):
+    recalls = db_session.query(Recalls)
     with open(os.path.join(current_app.config['DIR_DB_QUERIES'],query_file_name)) as json_file:
         search_criteria_dict=json.load(json_file)
         json_file.close()
@@ -61,7 +61,7 @@ def recalls_query_util(query_file_name):
             user_criteria = [a for a in re.split(r'(\s|\,)',  search_criteria_dict.get('user')[0].strip()) if len(a)>1]
             table_ids_dict={}
             for j in user_criteria:
-                recalls_table_ids=sess.query(Tracking_re.recalls_table_id).filter(Tracking_re.updated_to.contains(j)).distinct().all()
+                recalls_table_ids=db_session.query(Tracking_re.recalls_table_id).filter(Tracking_re.updated_to.contains(j)).distinct().all()
                 recalls_table_ids=[i[0] for i in recalls_table_ids]
                 print('recalls_table_ids:::',recalls_table_ids)
                 table_ids_dict[j]=recalls_table_ids
@@ -148,7 +148,7 @@ search_criteria_dict. len(recalls) is
 
 
     
-def update_recall(formDict, re_id_for_dash, verified_by_list):
+def update_recall(formDict, re_id_for_dash, verified_by_list, db_session):
     print('START update_recall')
     # date_flag=False
 
@@ -176,7 +176,7 @@ def update_recall(formDict, re_id_for_dash, verified_by_list):
     update_data['categories']=assigned_categories
     #END important for category list
     
-    existing_data = sess.query(Recalls).get(int(re_id_for_dash))
+    existing_data = db_session.query(Recalls).get(int(re_id_for_dash))
     Recalls_attr=['km_notes', 'categories']
     # at_least_one_field_changed = False
     #loop over existing data attributes
@@ -198,7 +198,7 @@ def update_recall(formDict, re_id_for_dash, verified_by_list):
             #Change timestamp of record last update
             setattr(existing_data, 'date_updated' ,datetime.now())
             
-            sess.commit()
+            db_session.commit()
             
             #Track change in Track_inv table here
             track_util('recalls', i,update_from, update_data.get(i),re_id_for_dash)
@@ -212,23 +212,5 @@ def update_recall(formDict, re_id_for_dash, verified_by_list):
     print('END update_recall')
 
 
-# def create_categories_xlsx(excel_file_name):
-    # print('START create_categories_xlsx')
-    # excelObj=pd.ExcelWriter(os.path.join(
-        # current_app.config['DIR_DB_FILES_UTILITY'],excel_file_name))
 
-    # columnNames=Investigations.__table__.columns.keys()
-    # colNamesDf=pd.DataFrame([columnNames],columns=columnNames)
-    # colNamesDf.to_excel(excelObj,sheet_name='Investigation Data', header=False, index=False)
-
-    # queryDf = pd.read_sql_table('investigations', db.engine)
-    # queryDf.to_excel(excelObj,sheet_name='Investigation Data', header=False, index=False,startrow=1)
-    # inv_data_workbook=excelObj.book
-    # notes_worksheet = inv_data_workbook.add_worksheet('Notes')
-    # notes_worksheet.write('A1','Created:')
-    # notes_worksheet.set_column(1,1,len(str(datetime.now())))
-    # time_stamp_format = inv_data_workbook.add_format({'num_format': 'mmm d yyyy hh:mm:ss AM/PM'})
-    # notes_worksheet.write('B1',datetime.now(), time_stamp_format)
-    # excelObj.close()
-    # print('END create_categories_xlsx')
 

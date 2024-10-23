@@ -1,6 +1,6 @@
 from flask import Blueprint
 from flask import render_template, url_for, redirect, flash, request, abort, session,\
-    Response, current_app, send_from_directory, jsonify
+    Response, current_app, send_from_directory, jsonify, g
 from app_package import mail
 # from km03_models import sess, engine, text, Base, Users, Investigations, Tracking_inv, \
 #     Saved_queries_inv, Recalls, Tracking_re, Saved_queries_re
@@ -88,8 +88,8 @@ def before_request():
 @bp_recalls.route("/search_recalls", methods=["GET","POST"])
 @login_required
 def search_recalls():
-    print('*TOP OF def search_recalls()*')
     logger_bp_recalls.info('in search_recalls page')
+    db_session = g.db_session
     category_list =[y for x in category_list_dict_util().values() for y in x]
     column_names=column_names_re_util()
     column_names_dict=column_names_dict_re_util()
@@ -101,14 +101,14 @@ def search_recalls():
         category_dict={'category1':''}
     
     #user_list for searching userlist
-    user_list=sess.query(Tracking_re.updated_to).filter(Tracking_re.field_updated=='verified_by_user').distinct().all()
+    user_list=db_session.query(Tracking_re.updated_to).filter(Tracking_re.field_updated=='verified_by_user').distinct().all()
     user_list=[i[0] for i in user_list]
     
     #Get/identify query to run for table
     if request.args.get('query_file_name'):
         query_file_name=request.args.get('query_file_name')
         print('query_file_name:::', query_file_name)
-        recalls_query, search_criteria_dictionary, category_dict = recalls_query_util(query_file_name)
+        recalls_query, search_criteria_dictionary, category_dict = recalls_query_util(query_file_name, db_session)
         no_hits_flag = False
         if len(recalls_query) ==0:
             no_hits_flag = True
@@ -116,7 +116,7 @@ def search_recalls():
         recalls_query, search_criteria_dictionary = ([],{})
     else:
         query_file_name= 'default_query_re.txt'
-        recalls_query, search_criteria_dictionary, category_dict = recalls_query_util(query_file_name)
+        recalls_query, search_criteria_dictionary, category_dict = recalls_query_util(query_file_name, db_session)
         no_hits_flag = False
         if len(recalls_query) ==0:
             no_hits_flag = True        
@@ -191,14 +191,15 @@ def search_recalls():
 @login_required
 def recalls_dashboard():
     print('*TOP OF def dashboard()*')
+    db_session = g.db_session
     re_form=ReForm()
         
     #view, update
     if request.args.get('re_id_for_dash'):
         # print('request.args.get(re_id_for_dash, should build verified_by_list')
         re_id_for_dash = int(request.args.get('re_id_for_dash'))
-        dash_re= sess.query(Recalls).get(re_id_for_dash)
-        verified_by_list =sess.query(Tracking_re.updated_to, Tracking_re.time_stamp).filter_by(
+        dash_re= db_session.query(Recalls).get(re_id_for_dash)
+        verified_by_list =db_session.query(Tracking_re.updated_to, Tracking_re.time_stamp).filter_by(
             recalls_table_id=re_id_for_dash,field_updated='verified_by_user').all()
         verified_by_list=[[i[0],i[1].strftime('%Y/%m/%d %#I:%M%p')] for i in verified_by_list]
         # print('verified_by_list:::',verified_by_list)
@@ -338,9 +339,9 @@ def recalls_dashboard():
             #This can only be case if update + user verified previously but no unchecked
             if (current_user.email in verified_by_list_util) and (
                 formDict.get('verified_by_user')==None):
-                sess.query(Tracking_re).filter_by(recalls_table_id=int(re_id_for_dash),
+                db_session.query(Tracking_re).filter_by(recalls_table_id=int(re_id_for_dash),
                     field_updated='verified_by_user',updated_to=current_user.email).delete()
-                sess.commit()
+                db_session.commit()
             
             
             return redirect(url_for('bp_recalls.recalls_dashboard', re_id_for_dash=re_id_for_dash,
@@ -372,7 +373,7 @@ def recalls_dashboard():
             #check if linked record has
             if formDict.get('record_type')=='investigations':
                 #get query of linked record:
-                dash_re_linked= sess.query(Investigations).get(int(record_list_id))
+                dash_re_linked= db_session.query(Investigations).get(int(record_list_id))
                 if dash_re_linked.linked_records!=None and dash_re_linked.linked_records!='':
                     linked_records_dict_for_linked=json.loads(dash_re_linked.linked_records)
                     linked_records_dict_for_linked['recalls'+str(re_id_for_dash)]=specified_to_current
@@ -380,7 +381,7 @@ def recalls_dashboard():
                     linked_records_dict_for_linked={'recalls'+str(re_id_for_dash):specified_to_current}
             elif formDict.get('record_type')=='recalls':
                 #get query of linked record:
-                dash_re_linked= sess.query(Recalls).get(int(record_list_id))
+                dash_re_linked= db_session.query(Recalls).get(int(record_list_id))
                 if dash_re_linked.linked_records!=None and dash_re_linked.linked_records!='':
                     linked_records_dict_for_linked=json.loads(dash_re_linked.linked_records)
                     linked_records_dict_for_linked['recalls'+str(re_id_for_dash)]=specified_to_current
@@ -390,7 +391,7 @@ def recalls_dashboard():
             #add list to current record db linked_record
             dash_re.linked_records=json.dumps(linked_records_dict_current)
             dash_re_linked.linked_records=json.dumps(linked_records_dict_for_linked)
-            sess.commit()
+            db_session.flush()
             
             
             return redirect(url_for('bp_recalls.recalls_dashboard', record_type=record_type, 
@@ -414,7 +415,8 @@ def recalls_dashboard():
 @login_required
 def delete_file_re(re_id_for_dash,filename):
     #update Investigations table files column
-    dash_re =sess.query(Recalls).get(re_id_for_dash)
+    db_session = g.db_session
+    dash_re =db_session.query(Recalls).get(re_id_for_dash)
     update_from=dash_re.files
     print('delete_file route - dash_re::::',dash_re.files)
     file_list=''
@@ -423,14 +425,14 @@ def delete_file_re(re_id_for_dash,filename):
         file_list=dash_re.files.split(",")
         file_list.remove(filename)
     dash_re.files=''
-    sess.commit()
+    db_session.flush()
     if len(file_list)>0:
         for i in range(0,len(file_list)):
             if i==0:
                 dash_re.files = file_list[i]
             else:
                 dash_re.files = dash_re.files +',' + file_list[i]
-    sess.commit()
+    db_session.flush()
         
     #update tracking
     track_util('recalls', 'files',update_from,dash_re.files,re_id_for_dash)
@@ -499,8 +501,9 @@ def delete_linked_record_recalls(re_id_for_dash,linked_record):
     print('ENTER -delete_linked_record')
     print('re_id_for_dash::::', re_id_for_dash)
     print('linked_record::::',linked_record)
+    db_session = g.db_session
     #get current record sqlalchemy
-    current_record=sess.query(Recalls).get(int(re_id_for_dash))
+    current_record=db_session.query(Recalls).get(int(re_id_for_dash))
     
     #get linked_record_type
     #get linked_record id
@@ -524,9 +527,9 @@ def delete_linked_record_recalls(re_id_for_dash,linked_record):
     #Edit LINKED_RECORD's linked record
     #get linked reocrd sqlalchemy
     if linked_record[0:3]=="Inv":
-        linked_record_sql=sess.query(Investigations).get(int(linked_record_id))
+        linked_record_sql=db_session.query(Investigations).get(int(linked_record_id))
     elif linked_record[0:3]=="Rec":
-        linked_record_sql=sess.query(Recalls).get(int(linked_record_id))
+        linked_record_sql=db_session.query(Recalls).get(int(linked_record_id))
         
     #make current_record_key= 'recalls' + id
     current_record_key='recalls' + re_id_for_dash
@@ -535,7 +538,7 @@ def delete_linked_record_recalls(re_id_for_dash,linked_record):
     print('linked_records_dict::::',linked_records_dict)
     del linked_records_dict[current_record_key]
     linked_record_sql.linked_records=json.dumps(linked_records_dict)
-    sess.commit()
+    db_session.flush()
     print('linked_records_dict after deleted and should be in selected linked_records::::',linked_records_dict)
     return redirect(url_for('bp_recalls.recalls_dashboard', re_id_for_dash=re_id_for_dash))
 

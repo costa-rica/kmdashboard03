@@ -51,7 +51,7 @@ def search_criteria_dictionary_util(formDict, query_file_name):
     return query_file_name
     
     
-def record_remover_util(current_record_type,linked_record_type,id_for_dash):
+def record_remover_util(current_record_type,linked_record_type,id_for_dash, db_session):
     #this function: 1)removes records from dropdown;
     #2)makes list of records dashboard, directly taken from removed records in #1
     
@@ -60,10 +60,10 @@ def record_remover_util(current_record_type,linked_record_type,id_for_dash):
     
     # determine current_record_type and #get record query and linked_records
     if current_record_type=='investigations':
-        current_record= sess.query(Investigations).get(int(id_for_dash))
+        current_record= db_session.query(Investigations).get(int(id_for_dash))
         # investigation_id_list.append(int(id_for_dash))
     elif current_record_type=='recalls':
-        current_record= sess.query(Recalls).get(int(id_for_dash))
+        current_record= db_session.query(Recalls).get(int(id_for_dash))
         # recalls_id_list.append(int(id_for_dash))
 
     #if linked_records>0 then make lists of existing links from 
@@ -78,7 +78,7 @@ def record_remover_util(current_record_type,linked_record_type,id_for_dash):
     
     #prepare Inv AND Re df for 1)dropdown list by removing the id's from previous section
     #2)linked_records list for current record
-    inv_list_identifiers=sess.query(
+    inv_list_identifiers=db_session.query(
         Investigations.id, Investigations.NHTSA_ACTION_NUMBER, Investigations.MAKE, Investigations.MODEL, Investigations.COMPNAME).all()
     df_inv=pd.DataFrame(inv_list_identifiers,columns = ['id', 'NHTSA_No', 'MAKE','MODEL','Component'])
     
@@ -103,7 +103,7 @@ def record_remover_util(current_record_type,linked_record_type,id_for_dash):
             records_array_inv.append(thing)
     #END make list of Investigations linked to current record - if any
     
-    re_list_identifiers=sess.query(
+    re_list_identifiers=db_session.query(
         Recalls.RECORD_ID,Recalls.CAMPNO,Recalls.MAKETXT,Recalls.MODELTXT,Recalls.COMPNAME).all()
     df_re=pd.DataFrame(re_list_identifiers,columns=['RECORD_ID','CAMPNO','MAKETXT','MODELTXT','COMPNAME'])
     
@@ -149,13 +149,13 @@ def record_remover_util(current_record_type,linked_record_type,id_for_dash):
 
 
 
-def update_files_util(filesDict, id_for_dash,record_type):
+def update_files_util(filesDict, id_for_dash,record_type, db_session):
     if record_type=='investigation':
-        dash_record= sess.query(Investigations).get(id_for_dash)
+        dash_record= db_session.query(Investigations).get(id_for_dash)
         uploaded_file=request.files['investigation_file']
         current_files_dir_name = 'Investigation_' +str(id_for_dash)
     else:
-        dash_record= sess.query(Recalls).get(id_for_dash)
+        dash_record= db_session.query(Recalls).get(id_for_dash)
         uploaded_file=request.files['recall_file']
         current_files_dir_name = 'Recall_' +str(id_for_dash)
     
@@ -177,13 +177,13 @@ def update_files_util(filesDict, id_for_dash,record_type):
         dash_record.files =uploaded_file.filename
     else:
         dash_record.files =dash_record.files +','+ uploaded_file.filename
-    sess.commit()
+    db_session.flush()
     
     flash('File added!', 'success')
     return 'file_added'
 
 
-def track_util(record_type, update_field,update_from, update_to,id_for_dash):
+def track_util(record_type, update_field,update_from, update_to,id_for_dash, db_session):
     #update tracking
     if record_type=='recalls':
         newTrack=Tracking_re(field_updated=update_field,updated_from=update_from,
@@ -192,8 +192,8 @@ def track_util(record_type, update_field,update_from, update_to,id_for_dash):
         newTrack=Tracking_inv(field_updated=update_field,updated_from=update_from,
             updated_to=update_to, updated_by=current_user.id,
             investigations_table_id=id_for_dash)
-    sess.add(newTrack)
-    sess.commit()
+    db_session.add(newTrack)
+    db_session.flush()
 
 
 
