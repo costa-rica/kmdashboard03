@@ -8,9 +8,10 @@ import logging
 from logging.handlers import RotatingFileHandler
 import os
 import json
-from km03_models import sess, engine, text, Base, \
-    Users
-
+# from km03_models import sess, engine, text, Base, \
+#     Users
+from km03_models import DatabaseSession, Users, Investigations, Tracking_inv, \
+    Saved_queries_inv, Recalls, Tracking_re, Saved_queries_re
 from app_package.bp_users.utils import send_reset_email, send_confirm_email
 import datetime
 import requests

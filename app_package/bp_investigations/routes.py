@@ -2,7 +2,9 @@ from flask import Blueprint
 from flask import render_template, url_for, redirect, flash, request, abort, session,\
     Response, current_app, send_from_directory, jsonify
 from app_package import mail
-from km03_models import sess, engine, text, Base, Users, Investigations, Tracking_inv, \
+# from km03_models import sess, engine, text, Base, Users, Investigations, Tracking_inv, \
+#     Saved_queries_inv, Recalls, Tracking_re, Saved_queries_re
+from km03_models import DatabaseSession, Users, Investigations, Tracking_inv, \
     Saved_queries_inv, Recalls, Tracking_re, Saved_queries_re
 from flask_login import login_user, current_user, logout_user, login_required
 import secrets

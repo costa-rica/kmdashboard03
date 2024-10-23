@@ -4,7 +4,9 @@ from wtforms import StringField, PasswordField, SubmitField, BooleanField\
     , TextAreaField, DateTimeField, FloatField, DateField, TimeField
 from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationError
 from wtforms_sqlalchemy.fields import QuerySelectField
-from km03_models import sess, engine, text, Base, Users, Investigations
+# from km03_models import sess, engine, text, Base, Users, Investigations
+from km03_models import DatabaseSession, Users, Investigations, Tracking_inv, \
+    Saved_queries_inv, Recalls, Tracking_re, Saved_queries_re
 from flask_login import current_user
 from datetime import datetime
 # from fileShareApp import db

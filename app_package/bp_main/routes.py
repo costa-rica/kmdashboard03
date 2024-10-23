@@ -1,13 +1,16 @@
 from flask import Blueprint
 from flask import render_template, url_for, redirect, flash, request, \
-    abort, session, Response, current_app, send_from_directory, make_response
+    abort, session, Response, current_app, send_from_directory, make_response, \
+    g
 from flask_login import login_required, login_user, logout_user, current_user
 import os
 import logging
 from logging.handlers import RotatingFileHandler
 import jinja2
 from app_package.bp_main.utils import create_categories_xlsx, existing_report
-from km03_models import sess, engine, text, Base, Users, Investigations, Tracking_inv, \
+# from km03_models import sess, engine, text, Base, Users, Investigations, Tracking_inv, \
+#     Saved_queries_inv, Recalls, Tracking_re, Saved_queries_re
+from km03_models import DatabaseSession, Users, Investigations, Tracking_inv, \
     Saved_queries_inv, Recalls, Tracking_re, Saved_queries_re
 import shutil
 
@@ -28,20 +31,21 @@ stream_handler.setFormatter(formatter_terminal)
 logger_bp_main.addHandler(file_handler)
 logger_bp_main.addHandler(stream_handler)
 
-@bp_main.before_request
-def before_request():
-    logger_bp_main.info(f"-- ***** in before_request route --")
-    ###### TEMPORARILY_DOWN: redirects to under construction page ########
-    if os.environ.get('TEMPORARILY_DOWN') == '1':
-        if request.url != request.url_root + url_for('bp_main.temporarily_down')[1:]:
-            # logger_bp_users.info("*** (logger_bp_users) Redirected ")
-            logger_bp_main.info(f'- request.referrer: {request.referrer}')
-            logger_bp_main.info(f'- request.url: {request.url}')
-            return redirect(url_for('bp_main.temporarily_down'))
+# @bp_main.before_request
+# def before_request():
+#     logger_bp_main.info(f"-- ***** in before_request route --")
+#     ###### TEMPORARILY_DOWN: redirects to under construction page ########
+#     if os.environ.get('TEMPORARILY_DOWN') == '1':
+#         if request.url != request.url_root + url_for('bp_main.temporarily_down')[1:]:
+#             # logger_bp_users.info("*** (logger_bp_users) Redirected ")
+#             logger_bp_main.info(f'- request.referrer: {request.referrer}')
+#             logger_bp_main.info(f'- request.url: {request.url}')
+#             return redirect(url_for('bp_main.temporarily_down'))
 
 @bp_main.route("/", methods=["GET","POST"])
 def home():
     logger_bp_main.info(f"-- in home page route --")
+    db_session = g.db_session
     if request.method == 'POST':
         # session.permanent = True
         formDict = request.form.to_dict()
@@ -49,7 +53,7 @@ def home():
         # login_as_guest = formDict.get('login_as_guest')
         # print(login_as_guest)
 
-        guest_user = sess.query(Users).filter_by(email=current_app.config.get('GUEST_EMAIL')).first()
+        guest_user = db_session.query(Users).filter_by(email=current_app.config.get('GUEST_EMAIL')).first()
         login_user(guest_user)
         return redirect(url_for('bp_main.user_home'))
 

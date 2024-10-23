@@ -3,7 +3,9 @@ from flask_login import current_user
 import json
 # import requests
 # from datetime import datetime, timedelta
-from km03_models import sess, Users, Recalls, Investigations
+# from km03_models import sess, Users, Recalls, Investigations
+from km03_models import DatabaseSession, Users, Investigations, Tracking_inv, \
+    Saved_queries_inv, Recalls, Tracking_re, Saved_queries_re
 # import time
 from flask_mail import Message
 from app_package import mail
